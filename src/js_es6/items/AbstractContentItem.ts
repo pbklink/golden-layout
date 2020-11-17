@@ -7,6 +7,7 @@ import { EventEmitter } from '../utils/EventEmitter'
 import { getJQueryOffset, getJQueryWidthAndHeight } from '../utils/jquery-legacy'
 import { AreaLinkedRect } from '../utils/types'
 import { getUniqueId, setElementDisplayVisibility } from '../utils/utils'
+import { ComponentItem } from './ComponentItem'
 import { Stack } from './Stack'
 
 /**
@@ -15,7 +16,6 @@ import { Stack } from './Stack'
  *
  * It also provides a number of functions for tree traversal
  */
-
 
 export abstract class AbstractContentItem extends EventEmitter {
     /** @internal */
@@ -45,6 +45,10 @@ export abstract class AbstractContentItem extends EventEmitter {
 
     static isStack(item: AbstractContentItem): item is Stack {
         return item.isStack;
+    }
+
+    static isComponentItem(item: AbstractContentItem): item is ComponentItem {
+        return item.isComponent;
     }
 
     /** @internal */
@@ -108,7 +112,13 @@ export abstract class AbstractContentItem extends EventEmitter {
         /**
          * Remove the item from the configuration
          */
-        this._config.content.splice(index, 1);
+        const content = this._config.content;
+        const contentCount = content.length;
+        if (contentCount === 1) {
+            this._config.content = [];
+        } else {
+            this._config.content = [...content.slice(0, index), ...content.slice(index + 1, contentCount)];
+        }
 
         /**
          * If this node still contains other content items, adjust their size
@@ -128,30 +138,30 @@ export abstract class AbstractContentItem extends EventEmitter {
         }
     }
 
-    /**
-     * Hides a child node (and its children) from the tree reclaiming its space in the layout
-     */
-    undisplayChild(contentItem: AbstractContentItem): void {
-        /*
-         * Get the position of the item that's to be removed within all content items this node contains
-         */
-        const index = this._contentItems.indexOf(contentItem);
+    // /**
+    //  * Hides a child node (and its children) from the tree reclaiming its space in the layout
+    //  */
+    // undisplayChild(contentItem: AbstractContentItem): void {
+    //     /*
+    //      * Get the position of the item that's to be removed within all content items this node contains
+    //      */
+    //     const index = this._contentItems.indexOf(contentItem);
 
-        /*
-         * Make sure the content item to be removed is actually a child of this item
-         */
-        if (index === -1) {
-            throw new Error('Can\'t remove child item. Unknown content item');
-        }
+    //     /*
+    //      * Make sure the content item to be removed is actually a child of this item
+    //      */
+    //     if (index === -1) {
+    //         throw new Error('Can\'t remove child item. Unknown content item');
+    //     }
 
-        if (!(this.isRoot) && this._config.isClosable === true) {
-            if (this._parent === null) {
-                throw new UnexpectedNullError('CIUC00874');
-            } else {
-                this._parent.undisplayChild(this);
-            }
-        }
-    }
+    //     if (!(this.isRoot) && this._config.isClosable === true) {
+    //         if (this._parent === null) {
+    //             throw new UnexpectedNullError('CIUC00874');
+    //         } else {
+    //             this._parent.undisplayChild(this);
+    //         }
+    //     }
+    // }
 
     /**
      * Sets up the tree structure for the newly added child
@@ -172,7 +182,13 @@ export abstract class AbstractContentItem extends EventEmitter {
             this._config.content = [];
         }
 
-        this._config.content.splice(index, 0, contentItem._config);
+        const content = this._config.content;
+        const contentCount = content.length;
+        if (contentCount === 0) {
+            this._config.content = [contentItem._config];
+        } else {
+            this._config.content = [...content.slice(0, index), contentItem._config, ...content.slice(index, contentCount)];
+        }
         contentItem.setParent(this);
 
         if (this._isInitialised === true && contentItem._isInitialised === false) {
@@ -520,7 +536,7 @@ export abstract class AbstractContentItem extends EventEmitter {
      */
     private createContentItems(config: ItemConfig) {
         if (!(config.content instanceof Array)) {
-            throw new ConfigurationError('content must be an Array', config);
+            throw new ConfigurationError('content must be an Array', JSON.stringify(config));
         } else {
             const count = config.content.length;
             const result = new Array<AbstractContentItem>(count);

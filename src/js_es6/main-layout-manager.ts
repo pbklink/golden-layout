@@ -1,6 +1,7 @@
 import { Config, ManagerConfig, PopoutManagerConfig, RowOrColumnOrStackParentItemConfig } from './config/config';
 import { UserConfig } from './config/UserConfig';
 import { LayoutManager } from './LayoutManager';
+import { I18nStrings } from './utils/i18n-strings';
 
 export class MainLayoutManager extends LayoutManager {
     private _mainConfig: Config;
@@ -9,6 +10,8 @@ export class MainLayoutManager extends LayoutManager {
         super(false, MainLayoutManager.createConfig(userConfig), container);
 
         this._mainConfig = this.config as Config;
+
+        I18nStrings.checkInitialise();
     }
 
     protected createToConfig(content: RowOrColumnOrStackParentItemConfig.ChildItemConfig[], 
@@ -51,9 +54,9 @@ export namespace MainLayoutManager {
 
         // nextNode(config);
 
-        if (!config.header.show) {
-            config.dimensions.headerHeight = 0;
-        }
+        // if (!config.header.show) {
+        //     config.dimensions.headerHeight = 0;
+        // }
 
         return config;
     }

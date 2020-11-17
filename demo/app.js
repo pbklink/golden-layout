@@ -30,7 +30,7 @@ function run() {
   //
   // set layout type
   //
-  var layout =  'mini'
+  var layout =  'tab-dropdown'
 
   //
   // init
@@ -55,6 +55,7 @@ function run() {
 
   myLayout.registerComponent( 'html', function( container, state ) {
     var paraElement = document.createElement('p');
+    paraElement.style.textAlign = 'left';
     var title = container.config.title;
     paraElement.innerHTML = (title ?? 'unknown') + ' component';
     container.contentElement.appendChild(paraElement);

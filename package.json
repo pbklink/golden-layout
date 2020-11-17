@@ -21,7 +21,9 @@
   "sideEffects": false,
   "scripts": {
     "build:webpack": "npx webpack --mode development --config ./webpack/demo/webpack.config.js",
-    "build:ts": "tsc -p tsconfig.module.json && tsc -p tsconfig.cjs.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:ts": "npm run build:module && npm run build:cjs",
     "build:styles": "node ./scripts/css.js",
     "build": "npm run clean && npm-run-all --parallel build:*",
     "clean": "npm-run-all clean:*",

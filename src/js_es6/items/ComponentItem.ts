@@ -4,7 +4,7 @@ import { Tab } from '../controls/Tab';
 import { UnexpectedUndefinedError } from '../errors/internal-error';
 import { LayoutManager } from '../LayoutManager';
 import { ReactComponentHandler } from '../utils/ReactComponentHandler';
-import { createTemplateHtmlElement, deepExtend, getElementHeight, getElementWidth } from '../utils/utils';
+import { createTemplateHtmlElement, deepExtend, getElementWidthAndHeight } from '../utils/utils';
 import { AbstractContentItem } from './AbstractContentItem';
 import { Stack } from './Stack';
 
@@ -83,7 +83,8 @@ export class ComponentItem extends AbstractContentItem {
     private updateNodeSize(): void {
         if (this.element.style.display !== 'none') {
             // Do not update size of hidden components to prevent unwanted reflows
-            this._container.setSizeToNodeSize(getElementWidth(this.element), getElementHeight(this.element));
+            const { width, height } = getElementWidthAndHeight(this.element);
+            this._container.setSizeToNodeSize(width, height);
         }
     }
 

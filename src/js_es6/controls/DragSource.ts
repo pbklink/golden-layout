@@ -28,8 +28,8 @@ export class DragSource {
         // Does this need to be regenerated with each drag operation?
         this._dummyRootContainer = document.createElement('div');
 
-        const rootConfig = ManagerConfig.createRootItemConfig(this._layoutManager.config);
-        rootConfig.content = []; // want to create root with 0 children
+        // Create root with 0 children
+        const rootConfig = ManagerConfig.createRootItemConfig(this._layoutManager.config, []);
         this._dummyRootContentItem = new Root(this._layoutManager, rootConfig, this._dummyRootContainer);
 
 

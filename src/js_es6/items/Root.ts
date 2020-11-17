@@ -4,7 +4,7 @@ import { AbstractContentItem } from '../items/AbstractContentItem';
 import { RowOrColumn } from '../items/RowOrColumn';
 import { LayoutManager } from '../LayoutManager';
 import { AreaLinkedRect } from '../utils/types';
-import { createTemplateHtmlElement, getElementHeight, getElementWidth, setElementHeight, setElementWidth } from '../utils/utils';
+import { createTemplateHtmlElement, getElementWidthAndHeight, setElementHeight, setElementWidth } from '../utils/utils';
 import { ComponentItem } from './ComponentItem';
 
 export class Root extends AbstractContentItem {
@@ -92,8 +92,7 @@ export class Root extends AbstractContentItem {
     }
 
     private updateNodeSize(): void {
-        const width = getElementWidth(this._containerElement);
-        const height = getElementHeight(this._containerElement);
+        const { width, height } = getElementWidthAndHeight(this._containerElement);
 
         setElementWidth(this.element, width);
         setElementHeight(this.element, height);

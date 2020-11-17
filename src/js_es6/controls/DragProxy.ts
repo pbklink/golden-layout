@@ -227,7 +227,8 @@ export class DragProxy extends EventEmitter {
          * parent is null if the drag had been initiated by a external drag source
          */
         if (this._contentItem.parent !== null) {
-            this._contentItem.parent.undisplayChild(this._contentItem);
+            // this._contentItem.parent.undisplayChild(this._contentItem);
+            this._contentItem.parent.removeChild(this._contentItem, true);
         }
     }
 
@@ -235,18 +236,18 @@ export class DragProxy extends EventEmitter {
      * Removes the item from its original position within the tree
      */
     private updateTree() {
-        // Parent is NO LONGER null if the drag had been initiated by a external drag source
-        // If an external drag source initiated drag, then dummy parent will be used.  In this case
-        // still remove child from (dummy) parent
-        if (this._contentItem.parent !== null) {
-            this._contentItem.parent.removeChild(this._contentItem, true);
-        }
+        // // Parent is NO LONGER null if the drag had been initiated by a external drag source
+        // // If an external drag source initiated drag, then dummy parent will be used.  In this case
+        // // still remove child from (dummy) parent
+        // if (this._contentItem.parent !== null) {
+        //     this._contentItem.parent.removeChild(this._contentItem, true);
+        // }
 
         this._contentItem.setParent(this._contentItemParent);
     }
 
     /**
-     * Updates the Drag Proxie's dimensions
+     * Updates the Drag Proxy's dimensions
      */
     private setDimensions() {
         const dimensions = this._layoutManager.config.dimensions;
@@ -258,10 +259,11 @@ export class DragProxy extends EventEmitter {
             if (width === undefined || height === undefined) {
                 throw new Error('DragProxy.setDimensions: width and/or height undefined');
             } else {
+                const headerHeight = this._layoutManager.config.header.show === false ? 0 : dimensions.headerHeight;
                 this._element.style.width = numberToPixels(width);
                 this._element.style.height = numberToPixels(height)
-                width -= (this._sided ? dimensions.headerHeight : 0);
-                height -= (!this._sided ? dimensions.headerHeight : 0);
+                width -= (this._sided ? headerHeight : 0);
+                height -= (!this._sided ? headerHeight : 0);
                 this._childElementContainer.style.width = numberToPixels(width);
                 this._childElementContainer.style.height = numberToPixels(height);
                 this._contentItem.element.style.width = numberToPixels(width);

@@ -9,6 +9,7 @@ import {
     createTemplateHtmlElement,
     getElementHeight,
     getElementWidth,
+    getElementWidthAndHeight,
     numberToPixels,
     pixelsToNumber,
 
@@ -119,52 +120,52 @@ export class RowOrColumn extends AbstractContentItem {
     }
 
 
-    /**
-     * Undisplays a child of this element
-     */
-    undisplayChild(contentItem: AbstractContentItem): void {
-        const undisplayedItemSize = contentItem.config[this._dimension];
-        const index = this.contentItems.indexOf(contentItem);
-        const splitterIndex = Math.max(index - 1, 0);
+    // /**
+    //  * Undisplays a child of this element
+    //  */
+    // undisplayChild(contentItem: AbstractContentItem): void {
+    //     const undisplayedItemSize = contentItem.config[this._dimension];
+    //     const index = this.contentItems.indexOf(contentItem);
+    //     const splitterIndex = Math.max(index - 1, 0);
 
-        if (index === -1) {
-            throw new Error('Can\'t undisplay child. ContentItem is not child of this Row or Column');
-        }
+    //     if (index === -1) {
+    //         throw new Error('Can\'t undisplay child. ContentItem is not child of this Row or Column');
+    //     }
 
-        /**
-         * Hide the splitter before the item or after if the item happens
-         * to be the first in the row/column
-         */
-        if (this._splitter[splitterIndex]) {
-            setElementDisplayVisibility(this._splitter[splitterIndex].element, false);
-        }
+    //     /**
+    //      * Hide the splitter before the item or after if the item happens
+    //      * to be the first in the row/column
+    //      */
+    //     if (this._splitter[splitterIndex]) {
+    //         setElementDisplayVisibility(this._splitter[splitterIndex].element, false);
+    //     }
 
-        if (splitterIndex < this._splitter.length) {
-            if (this.isDocked(splitterIndex)) {
-                setElementDisplayVisibility(this._splitter[splitterIndex].element, false);
-            }
-        }
+    //     if (splitterIndex < this._splitter.length) {
+    //         if (this.isDocked(splitterIndex)) {
+    //             setElementDisplayVisibility(this._splitter[splitterIndex].element, false);
+    //         }
+    //     }
 
-        /**
-         * Allocate the space that the hidden item occupied to the remaining items
-         */
-        const dockedCount = this.calculateDockedCount();
-        for (let i = 0; i < this.contentItems.length; i++) {
-            if (this.contentItems[i] !== contentItem) {
-                if (!this.isDocked(i))
-                    this.contentItems[i].config[this._dimension] += undisplayedItemSize / (this.contentItems.length - 1 - dockedCount);                
-            } else {
-              this.contentItems[i].config[this._dimension] = 0
-            }
-        }
+    //     /**
+    //      * Allocate the space that the hidden item occupied to the remaining items
+    //      */
+    //     const dockedCount = this.calculateDockedCount();
+    //     for (let i = 0; i < this.contentItems.length; i++) {
+    //         if (this.contentItems[i] !== contentItem) {
+    //             if (!this.isDocked(i))
+    //                 this.contentItems[i].config[this._dimension] += undisplayedItemSize / (this.contentItems.length - 1 - dockedCount);                
+    //         } else {
+    //           this.contentItems[i].config[this._dimension] = 0
+    //         }
+    //     }
 
-        if (this.contentItems.length === 1) {
-            super.undisplayChild(contentItem);
-        }
+    //     if (this.contentItems.length === 1) {
+    //         super.undisplayChild(contentItem);
+    //     }
 
-        this.updateSize();
-        this.emitBubblingEvent('stateChanged');
-    }
+    //     this.updateSize();
+    //     this.emitBubblingEvent('stateChanged');
+    // }
 
 
     /**
@@ -265,7 +266,7 @@ export class RowOrColumn extends AbstractContentItem {
             throw new Error('Can\'t dock child when it single');
 
         const removedItemSize = contentItem.config[this._dimension];
-        const headerSize = this.layoutManager.config.dimensions.headerHeight;
+        const headerSize = this.layoutManager.config.header.show === false ? 0 : this.layoutManager.config.dimensions.headerHeight;
         const index = this.contentItems.indexOf(contentItem);
         const splitterIndex = Math.max(index - 1, 0);
 
@@ -401,8 +402,7 @@ export class RowOrColumn extends AbstractContentItem {
     private calculateAbsoluteSizes() {
         const totalSplitterSize = (this.contentItems.length - 1) * this._splitterSize;
         const headerSize = this.layoutManager.config.dimensions.headerHeight;
-        let totalWidth = getElementWidth(this.element);
-        let totalHeight = getElementHeight(this.element);
+        let { width: totalWidth, height: totalHeight } = getElementWidthAndHeight(this.element);
 
         if (this._isColumn) {
             totalHeight -= totalSplitterSize;
@@ -665,7 +665,7 @@ export class RowOrColumn extends AbstractContentItem {
             const contentItem = this.contentItems[i];
             if (contentItem instanceof Stack) {
                 contentItem.setDockable(this.isDocked(i) ?? can);
-                contentItem.setClosable(can);
+                contentItem.setRowColumnClosable(can);
             }
         }
     }
@@ -675,7 +675,7 @@ export class RowOrColumn extends AbstractContentItem {
      * @param item
      * @private
      */
-    private _getMinimumDimensions(arr: ItemConfig[]) {
+    private _getMinimumDimensions(arr: readonly ItemConfig[]) {
         let minWidth = 0;
         let minHeight = 0;
 
