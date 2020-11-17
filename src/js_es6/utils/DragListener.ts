@@ -32,13 +32,18 @@ export class DragListener extends EventEmitter {
 
         /**
          * The delay after which to start the drag in milliseconds
+         * Do NOT make too short (previous value of 200 was not long enough for my touchpad)
+         * Should generally rely on the mouse move to start drag.  Not this delay.
          */
         this._nDelay = 1800;
 
         /**
          * The distance the mouse needs to be moved to qualify as a drag
+         * Previous comment: works better with delay only
+         * ???
+         * Probably somehow needs tuning for different devices
          */
-        this._nDistance = 10; //TODO - works better with delay only
+        this._nDistance = 10;
 
         this._nX = 0;
         this._nY = 0;
