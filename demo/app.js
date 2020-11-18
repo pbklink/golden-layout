@@ -1,4 +1,4 @@
-import { MainLayoutManager as GoldenLayout } from '../src/index';
+import { GoldenLayout } from '../src/index';
 import '../src/less/goldenlayout-base.less';
 import '../src/less/themes/goldenlayout-dark-theme.less';
 import './test.less';

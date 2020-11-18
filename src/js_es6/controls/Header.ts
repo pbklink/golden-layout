@@ -106,7 +106,7 @@ export class Header extends EventEmitter {
     /**
      * Caution: Returns active Tab but not necessarily Stack.activeComponentItem
      * Active Tab may not equal Stack.activeContentItem if Header.setActiveContentItem() is used
-     * @deprecated use {$@link Stack.getActiveComponentItem} */
+     * @deprecated use {@link Stack.getActiveComponentItem} */
     get activeContentItem(): AbstractContentItem | null {
         if (this._activeComponentItem === undefined) {
             return null;
@@ -116,10 +116,10 @@ export class Header extends EventEmitter {
     }
     get element(): HTMLElement { return this._element; }
     get tabsContainerElement(): HTMLElement { return this._tabsContainerElement; }
-    /** @deprecated use {$@link tabsContainerElement} */
+    /** @deprecated use {@link tabsContainerElement} */
     get tabsContainer(): HTMLElement { return this._tabsContainerElement; }
     get controlsContainerElement(): HTMLElement { return this._controlsContainerElement; }
-    /** @deprecated use {$@link controlsContainerElement} */
+    /** @deprecated use {@link controlsContainerElement} */
     get controlsContainer(): HTMLElement { return this._controlsContainerElement; }
 
     /** @internal */
@@ -158,7 +158,7 @@ export class Header extends EventEmitter {
 
         this._element = createTemplateHtmlElement(_template);
 
-        if (this._layoutManager.config.settings.selectionEnabled === true) {
+        if (this._layoutManager.managerConfig.settings.selectionEnabled === true) {
             this._element.classList.add('lm_selectable');
             this._element.addEventListener('click', this._headerClickListener);
             this._element.addEventListener('touchstart', this._headerTouchStartListener);
@@ -182,11 +182,33 @@ export class Header extends EventEmitter {
                     this._controlsContainerElement = controlsContainerElement as HTMLElement;
                     globalThis.document.addEventListener('mouseup', this._documentMouseUpListener);
 
-                    this._tabControlOffset = this._layoutManager.config.settings.tabControlOffset;
+                    this._tabControlOffset = this._layoutManager.managerConfig.settings.tabControlOffset;
                     this.createControls(closeEvent);
                 }
             }
         }
+    }
+
+    /**
+     * Destroys the entire header
+     * @internal
+     */
+    destroy(): void {
+        this.emit('destroy');
+
+        this._dockEvent = undefined;
+        this._popoutEvent = undefined;
+        this._maximiseToggleEvent = undefined;
+        this._headerClickTouchEvent = undefined;
+        this._componentRemoveEvent = undefined;
+        this._componentActivateEvent = undefined;
+        this._componentDragStartEvent = undefined;
+
+        for (let i = 0; i < this._tabs.length; i++) {
+            this._tabs[i].destroy();
+        }
+        globalThis.document.removeEventListener('mouseup', this._documentMouseUpListener);
+        this._element.remove();
     }
 
     /**
@@ -251,7 +273,7 @@ export class Header extends EventEmitter {
 
     /**
      * Caution: Will not change Stack ActiveContentItem
-     * @deprecated use {$@link Stack.setActiveComponentItem()}
+     * @deprecated use {@link Stack.setActiveComponentItem}
      */
     setActiveContentItem(item: AbstractContentItem): void {
         if (!AbstractContentItem.isComponentItem(item)) {
@@ -279,7 +301,7 @@ export class Header extends EventEmitter {
             if (activeIndex < 0) {
                 throw new AssertError('HSACI56632');
             } else {
-                if (this._layoutManager.config.settings.reorderOnTabMenuClick) {
+                if (this._layoutManager.managerConfig.settings.reorderOnTabMenuClick) {
                     /**
                      * If the tab selected was in the dropdown, move everything down one to make way for this one to be the first.
                      * This will make sure the most used tabs stay visible.
@@ -320,6 +342,7 @@ export class Header extends EventEmitter {
      * Updates the header's closability. If a stack/header is able
      * to close, but has a non closable component added to it, the stack is no
      * longer closable until all components are closable.
+     * @internal
      */
     updateClosability(): void {
         let isClosable: boolean;
@@ -364,6 +387,7 @@ export class Header extends EventEmitter {
         return false;
     }
 
+    /** @internal */
     processMaximised(): void {
         if (this._maximiseButton === undefined) {
             throw new UnexpectedUndefinedError('HPMAX16997');
@@ -372,186 +396,12 @@ export class Header extends EventEmitter {
         }
     }
 
+    /** @internal */
     processMinimised(): void {
         if (this._maximiseButton === undefined) {
             throw new UnexpectedUndefinedError('HPMIN16997');
         } else {
             this._maximiseButton.element.setAttribute('title', this._maximiseLabel);
-        }
-    }
-
-    /**
-     * Destroys the entire header
-     * @internal
-     */
-    destroy(): void {
-        this.emit('destroy');
-
-        this._dockEvent = undefined;
-        this._popoutEvent = undefined;
-        this._maximiseToggleEvent = undefined;
-        this._headerClickTouchEvent = undefined;
-        this._componentRemoveEvent = undefined;
-        this._componentActivateEvent = undefined;
-        this._componentDragStartEvent = undefined;
-
-        for (let i = 0; i < this._tabs.length; i++) {
-            this._tabs[i].destroy();
-        }
-        globalThis.document.removeEventListener('mouseup', this._documentMouseUpListener);
-        this._element.remove();
-    }
-
-    private handleTabCloseEvent(componentItem: ComponentItem) {
-        if (this._canRemoveComponent) {
-            if (this._componentRemoveEvent === undefined) {
-                throw new UnexpectedUndefinedError('HHTCE22294');
-            } else {
-                this._componentRemoveEvent(componentItem);
-            }
-        }
-    }
-
-    private handleTabActivateEvent(componentItem: ComponentItem) {
-        if (this._componentActivateEvent === undefined) {
-            throw new UnexpectedUndefinedError('HHTAE22294');
-        } else {
-            this._componentActivateEvent(componentItem);
-        }
-    }
-
-    private handleTabDragStartEvent(x: number, y: number, dragListener: DragListener, componentItem: ComponentItem) {
-        if (!this._canRemoveComponent) {
-            dragListener.cancelDrag();
-        } else {
-            if (this._componentDragStartEvent === undefined) {
-                throw new UnexpectedUndefinedError('HHTDSE22294');
-            } else {
-                this._componentDragStartEvent(x, y, dragListener, componentItem);
-            }
-        }
-    }
-
-    /**
-     * Creates the popout, maximise and close buttons in the header's top right corner
-     * @internal
-     */
-    private createControls(closeEvent: Header.CloseEvent) {
-        /**
-         * Dropdown to show additional tabs.
-         */
-        this._tabDropdownButton = new HeaderButton(this, this._tabDropdownLabel, 'lm_tabdropdown', () => this.showAdditionalTabsDropdown());
-        setElementDisplayVisibility(this._tabDropdownButton.element, false);
-
-        if (this._dockEnabled) {
-            this._dockButton = new HeaderButton(this, this._dockLabel, 'lm_dock', () => this.handleButtonDockEvent());
-        }
-
-        /**
-         * Popout control to launch component in new window.
-         */
-        if (this._popoutEnabled) {
-            new HeaderButton(this, this._popoutLabel, 'lm_popout', () => this.handleButtonPopoutEvent());
-        }
-
-        /**
-         * Maximise control - set the component to the full size of the layout
-         */
-        if (this._maximiseEnabled) {
-            this._maximiseButton = new HeaderButton(this, this._maximiseLabel, 'lm_maximise', (ev) => this.handleButtonMaximiseToggleEvent(ev));
-        }
-
-        /**
-         * Close button
-         */
-        if (this._configClosable) {
-            this._closeButton = new HeaderButton(this, this._closeLabel, 'lm_close', () => closeEvent());
-        }
-    }
-
-    /**
-     * Shows drop down for additional tabs when there are too many to display.
-     * @internal
-     */
-    private showAdditionalTabsDropdown() {
-        this._tabDropdownContainerElement.style.display = '';
-    }
-
-    /**
-     * Hides drop down for additional tabs when there are too many to display.
-     * @internal
-     */
-    private hideAdditionalTabsDropdown() {
-        this._tabDropdownContainerElement.style.display = 'none';
-    }
-
-    /** @internal */
-    private handleButtonDockEvent() {
-        if (this._dockEvent === undefined) {
-            throw new UnexpectedUndefinedError('HHBDE17834');
-        } else {
-            this._dockEvent();
-        }
-    }
-
-    /** @internal */
-    private handleButtonPopoutEvent() {
-        if (this._layoutManager.config.settings.popoutWholeStack) {
-            if (this._popoutEvent === undefined) {
-                throw new UnexpectedUndefinedError('HHBPOE17834');
-            } else {
-                this._popoutEvent();
-            }
-        } else {
-            if (this._activeComponentItem === null) {
-                throw new UnexpectedNullError('HOPC70222');
-            } else {
-                this._activeComponentItem.popout();
-            }
-        }
-    }
-
-    private handleButtonMaximiseToggleEvent(ev: Event) {
-        if (this._maximiseToggleEvent === undefined) {
-            throw new UnexpectedUndefinedError('HHBMTE16834');
-        } else {
-            this._maximiseToggleEvent(ev);
-        }
-    }
-
-    /**
-     * Invoked when the header's background is clicked (not it's tabs or controls)
-     * @internal
-     */
-    private onHeaderClick(event: MouseEvent) {
-        if (event.target === this._element.childNodes[0]) {
-            this.notifyHeaderClickTouch();
-        }
-    }
-
-    /**
-     * Invoked when the header's background is touched (not it's tabs or controls)
-     * @internal
-     */
-    private onHeaderTouchStart(event: TouchEvent) {
-        if (event.target === this._element.childNodes[0]) {
-            this.notifyHeaderClickTouch();
-        }
-    }
-
-    private notifyHeaderClickTouch() {
-        if (this._headerClickTouchEvent === undefined) {
-            throw new UnexpectedUndefinedError('HNHCT46834');
-        } else {
-            this._headerClickTouchEvent();
-        }
-    }
-
-    private notifyStateChanged() {
-        if (this._stateChangedEvent === undefined) {
-            throw new UnexpectedUndefinedError('HNSCBE66834');
-        } else {
-            this._stateChangedEvent();
         }
     }
 
@@ -570,7 +420,7 @@ export class Header extends EventEmitter {
         }
         setElementDisplayVisibility(this._tabDropdownButton.element, showTabMenu === true);
 
-        const headerHeight = this._show ? this._layoutManager.config.dimensions.headerHeight : 0;
+        const headerHeight = this._show ? this._layoutManager.managerConfig.dimensions.headerHeight : 0;
 
         if (this._leftRightSided) {
             this._element.style.height = '';
@@ -582,7 +432,7 @@ export class Header extends EventEmitter {
         let availableWidth = this._element.offsetWidth - this._controlsContainerElement.offsetWidth - this._tabControlOffset;
         let cumulativeTabWidth = 0;
         let tabOverlapAllowanceExceeded = false;
-        const tabOverlapAllowance = this._layoutManager.config.settings.tabOverlapAllowance;
+        const tabOverlapAllowance = this._layoutManager.managerConfig.settings.tabOverlapAllowance;
         const activeIndex = (this._activeComponentItem ? this._tabs.indexOf(this._activeComponentItem.tab as Tab) : 0);
         const activeTab = this._tabs[activeIndex];
         if (this._leftRightSided) {
@@ -669,6 +519,165 @@ export class Header extends EventEmitter {
             }
         }
 
+    }
+
+    /** @internal */
+    private handleTabCloseEvent(componentItem: ComponentItem) {
+        if (this._canRemoveComponent) {
+            if (this._componentRemoveEvent === undefined) {
+                throw new UnexpectedUndefinedError('HHTCE22294');
+            } else {
+                this._componentRemoveEvent(componentItem);
+            }
+        }
+    }
+
+    /** @internal */
+    private handleTabActivateEvent(componentItem: ComponentItem) {
+        if (this._componentActivateEvent === undefined) {
+            throw new UnexpectedUndefinedError('HHTAE22294');
+        } else {
+            this._componentActivateEvent(componentItem);
+        }
+    }
+
+    /** @internal */
+    private handleTabDragStartEvent(x: number, y: number, dragListener: DragListener, componentItem: ComponentItem) {
+        if (!this._canRemoveComponent) {
+            dragListener.cancelDrag();
+        } else {
+            if (this._componentDragStartEvent === undefined) {
+                throw new UnexpectedUndefinedError('HHTDSE22294');
+            } else {
+                this._componentDragStartEvent(x, y, dragListener, componentItem);
+            }
+        }
+    }
+
+    /**
+     * Creates the popout, maximise and close buttons in the header's top right corner
+     * @internal
+     */
+    private createControls(closeEvent: Header.CloseEvent) {
+        /**
+         * Dropdown to show additional tabs.
+         */
+        this._tabDropdownButton = new HeaderButton(this, this._tabDropdownLabel, 'lm_tabdropdown', () => this.showAdditionalTabsDropdown());
+        setElementDisplayVisibility(this._tabDropdownButton.element, false);
+
+        if (this._dockEnabled) {
+            this._dockButton = new HeaderButton(this, this._dockLabel, 'lm_dock', () => this.handleButtonDockEvent());
+        }
+
+        /**
+         * Popout control to launch component in new window.
+         */
+        if (this._popoutEnabled) {
+            new HeaderButton(this, this._popoutLabel, 'lm_popout', () => this.handleButtonPopoutEvent());
+        }
+
+        /**
+         * Maximise control - set the component to the full size of the layout
+         */
+        if (this._maximiseEnabled) {
+            this._maximiseButton = new HeaderButton(this, this._maximiseLabel, 'lm_maximise', (ev) => this.handleButtonMaximiseToggleEvent(ev));
+        }
+
+        /**
+         * Close button
+         */
+        if (this._configClosable) {
+            this._closeButton = new HeaderButton(this, this._closeLabel, 'lm_close', () => closeEvent());
+        }
+    }
+
+    /**
+     * Shows drop down for additional tabs when there are too many to display.
+     * @internal
+     */
+    private showAdditionalTabsDropdown() {
+        this._tabDropdownContainerElement.style.display = '';
+    }
+
+    /**
+     * Hides drop down for additional tabs when there are too many to display.
+     * @internal
+     */
+    private hideAdditionalTabsDropdown() {
+        this._tabDropdownContainerElement.style.display = 'none';
+    }
+
+    /** @internal */
+    private handleButtonDockEvent() {
+        if (this._dockEvent === undefined) {
+            throw new UnexpectedUndefinedError('HHBDE17834');
+        } else {
+            this._dockEvent();
+        }
+    }
+
+    /** @internal */
+    private handleButtonPopoutEvent() {
+        if (this._layoutManager.managerConfig.settings.popoutWholeStack) {
+            if (this._popoutEvent === undefined) {
+                throw new UnexpectedUndefinedError('HHBPOE17834');
+            } else {
+                this._popoutEvent();
+            }
+        } else {
+            if (this._activeComponentItem === null) {
+                throw new UnexpectedNullError('HOPC70222');
+            } else {
+                this._activeComponentItem.popout();
+            }
+        }
+    }
+
+    /** @internal */
+    private handleButtonMaximiseToggleEvent(ev: Event) {
+        if (this._maximiseToggleEvent === undefined) {
+            throw new UnexpectedUndefinedError('HHBMTE16834');
+        } else {
+            this._maximiseToggleEvent(ev);
+        }
+    }
+
+    /**
+     * Invoked when the header's background is clicked (not it's tabs or controls)
+     * @internal
+     */
+    private onHeaderClick(event: MouseEvent) {
+        if (event.target === this._element.childNodes[0]) {
+            this.notifyHeaderClickTouch();
+        }
+    }
+
+    /**
+     * Invoked when the header's background is touched (not it's tabs or controls)
+     * @internal
+     */
+    private onHeaderTouchStart(event: TouchEvent) {
+        if (event.target === this._element.childNodes[0]) {
+            this.notifyHeaderClickTouch();
+        }
+    }
+
+    /** @internal */
+    private notifyHeaderClickTouch() {
+        if (this._headerClickTouchEvent === undefined) {
+            throw new UnexpectedUndefinedError('HNHCT46834');
+        } else {
+            this._headerClickTouchEvent();
+        }
+    }
+
+    /** @internal */
+    private notifyStateChanged() {
+        if (this._stateChangedEvent === undefined) {
+            throw new UnexpectedUndefinedError('HNSCBE66834');
+        } else {
+            this._stateChangedEvent();
+        }
     }
 }
 

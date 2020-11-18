@@ -22,6 +22,8 @@
   "scripts": {
     "build:webpack": "npx webpack --mode development --config ./webpack/demo/webpack.config.js",
     "build:module": "tsc -p tsconfig.module.json",
+    "build:module:full": "tsc -p tsconfig.module.full.json",
+    "build:module:strip": "tsc -p tsconfig.module.strip.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:ts": "npm run build:module && npm run build:cjs",
     "build:styles": "node ./scripts/css.js",
@@ -33,7 +35,8 @@
     "demo": "webpack-dev-server --env.dev --mode development --config ./webpack/demo/webpack.config.js",
     "test": "cross-env karma start",
     "coverage": "karma start --single-run --no-auto-watch --coverage=true || echo done",
-    "doc": "npx del-cli doc && typedoc --tsconfig tsconfig.base.json --readme README.md"
+    "doc:full": "npx del-cli doc/full && typedoc --options ./typedoc.full.json",
+    "doc:strip": "npx del-cli doc/strip && typedoc --options ./typedoc.stripInternal.json"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",

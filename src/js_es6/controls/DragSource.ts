@@ -8,12 +8,7 @@ import { DragListener } from '../utils/DragListener';
 /**
  * Allows for any DOM item to create a component on drag
  * start tobe dragged into the Layout
- *
- * @param element
- * @param itemConfig the configuration for the contentItem that will be created
- * @param layoutManager
- *
- * @constructor
+ * @internal
  */
 export class DragSource {
     private _dragListener: DragListener | null;
@@ -29,7 +24,7 @@ export class DragSource {
         this._dummyRootContainer = document.createElement('div');
 
         // Create root with 0 children
-        const rootConfig = ManagerConfig.createRootItemConfig(this._layoutManager.config, []);
+        const rootConfig = ManagerConfig.createRootItemConfig(this._layoutManager.managerConfig, []);
         this._dummyRootContentItem = new Root(this._layoutManager, rootConfig, this._dummyRootContainer);
 
 

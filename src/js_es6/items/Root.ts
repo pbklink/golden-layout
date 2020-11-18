@@ -52,6 +52,7 @@ export class Root extends AbstractContentItem {
         this.emitBubblingEvent('stateChanged');
     }
 
+    /** @internal */
     calculateConfigContent(): RowOrColumnOrStackParentItemConfig.ChildItemConfig[] {
         const contentItems = this.contentItems;
         const count = contentItems.length;
@@ -89,21 +90,6 @@ export class Root extends AbstractContentItem {
     updateSize(): void {
         this.updateNodeSize();
         this.updateContentItemsSize();
-    }
-
-    private updateNodeSize(): void {
-        const { width, height } = getElementWidthAndHeight(this._containerElement);
-
-        setElementWidth(this.element, width);
-        setElementHeight(this.element, height);
-
-        /*
-         * Root can be empty
-         */
-        if (this.contentItems.length > 0) {
-            setElementWidth(this.contentItems[0].element, width);
-            setElementHeight(this.contentItems[0].element, height);
-        }
     }
 
     /** @internal */
@@ -187,6 +173,22 @@ export class Root extends AbstractContentItem {
                 contentItem.config[dimension] = sibling.config[dimension];
                 column.updateSize();
             }
+        }
+    }
+
+    /** @internal */
+    private updateNodeSize(): void {
+        const { width, height } = getElementWidthAndHeight(this._containerElement);
+
+        setElementWidth(this.element, width);
+        setElementHeight(this.element, height);
+
+        /*
+         * Root can be empty
+         */
+        if (this.contentItems.length > 0) {
+            setElementWidth(this.contentItems[0].element, width);
+            setElementHeight(this.contentItems[0].element, height);
         }
     }
 }

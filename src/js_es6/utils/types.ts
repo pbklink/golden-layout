@@ -4,6 +4,7 @@ export interface WidthAndHeight {
     height: number;    
 }
 
+/** @internal */
 export namespace WidthAndHeight {
     export const widthPropertyName = 'width';
     export const heightPropertyName = 'height';

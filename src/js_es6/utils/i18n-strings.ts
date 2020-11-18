@@ -7,15 +7,19 @@ export const enum I18nStringId {
 }
 
 export namespace I18nStrings {
+    /** @internal */
     let initialised = false;
 
+    /** @internal */
     interface Info {
         readonly id: I18nStringId;
         readonly default: string;
     }
 
+    /** @internal */
     type InfosObject = { [id in keyof typeof I18nStringId]: Info };
 
+    /** @internal */
     const infosObject: InfosObject = {
         PopoutCannotBeCreatedWithRootItemConfig: {
             id: I18nStringId.PopoutCannotBeCreatedWithRootItemConfig,
@@ -32,7 +36,8 @@ export namespace I18nStrings {
     }
 
     export const idCount = Object.keys(infosObject).length;
-    export const infos = Object.values(infosObject);
+    /** @internal */
+    const infos = Object.values(infosObject);
 
     export function checkInitialise(): void {
         if (!initialised) {

@@ -20,20 +20,34 @@ import { ComponentItem } from './ComponentItem';
 
 
 export class Stack extends AbstractContentItem {
+    /** @internal */
     private readonly _header: Header;
+    /** @internal */
     private readonly _childElementContainer: HTMLElement;
+    /** @internal */
     private readonly _maximisedEnabled: boolean;
+    /** @internal */
     private _activeComponentItem: ComponentItem;
+    /** @internal */
     private _dropSegment: Stack.Segment | null;
+    /** @internal */
     private _dropIndex: number | null;
+    /** @internal */
     private _contentAreaDimensions: Stack.ContentAreaDimensions | null;
+    /** @internal */
     private _headerSideChanged = false;
+    /** @internal */
     private _docker: Stack.Docker;
 
+    /** @internal */
     private _elementMouseEnterEventListener = () => this.onElementMouseEnter();
+    /** @internal */
     private _elementMouseLeaveEventListener = () => this.onElementMouseLeave();
+    /** @internal */
     private _resizeListener = () => this.handleResize();
+    /** @internal */
     private _maximisedListener = () => this.handleMaximised();
+    /** @internal */
     private _minimisedListener = () => this.handleMinimised();
 
     get stackConfig(): StackItemConfig { return this._stackConfig; }
@@ -45,11 +59,12 @@ export class Stack extends AbstractContentItem {
     get docker(): Stack.Docker { return this._docker; }
     get contentAreaDimensions(): Stack.ContentAreaDimensions | null { return this._contentAreaDimensions; }
 
+    /** @internal */
     constructor(layoutManager: LayoutManager, private readonly _stackConfig: StackItemConfig, private _stackParent: Stack.Parent) {
         super(layoutManager, _stackConfig, _stackParent, createTemplateHtmlElement(Stack.templateHtml));
 
         const itemHeaderConfig = _stackConfig.header;
-        const managerHeaderConfig = layoutManager.config.header;
+        const managerHeaderConfig = layoutManager.managerConfig.header;
         const configContent = _stackConfig.content;
         // If stack has only one component, then we can also check this for header settings
         let componentHeaderConfig: HeaderedItemConfig.Header | undefined;
@@ -88,7 +103,7 @@ export class Stack extends AbstractContentItem {
 
         this._header = new Header(layoutManager,
             this, headerSettings,
-            this._stackConfig.isClosable && this.layoutManager.config.settings.showCloseIcon,
+            this._stackConfig.isClosable && this.layoutManager.managerConfig.settings.showCloseIcon,
             () => this.remove(),
             () => this.handleDockEvent(),
             () => this.handlePopoutEvent(),
@@ -125,6 +140,7 @@ export class Stack extends AbstractContentItem {
         this._header.updateClosability();
     }
 
+    /** @internal */
     dock(mode?: boolean): void {
         if (this._header.dockEnabled)
             if (this._stackParent.isColumn || this._stackParent.isColumn) {
@@ -135,34 +151,6 @@ export class Stack extends AbstractContentItem {
     updateSize(): void {
         this.updateNodeSize();
         this.updateContentItemsSize();
-    }
-
-    private updateNodeSize(): void {
-        if (this.element.style.display !== 'none') {
-            const isDocked = this._docker.docked;
-            const content: WidthAndHeight = getElementWidthAndHeight(this.element);
-
-            if (this._header.show) {
-                const dimension = this._header.leftRightSided ? WidthAndHeight.widthPropertyName : WidthAndHeight.heightPropertyName;
-                content[dimension] -= this.layoutManager.config.dimensions.headerHeight;
-            }
-            if (isDocked) {
-                content[this._docker.dimension] = this._docker.realSize;
-            }
-            if (!isDocked || this._docker.dimension === WidthAndHeight.heightPropertyName) {
-                this._childElementContainer.style.width = numberToPixels(content.width);
-            }
-            if (!isDocked || this._docker.dimension === WidthAndHeight.widthPropertyName) {
-                this._childElementContainer.style.height = numberToPixels(content.height);
-            }
-
-            for (let i = 0; i < this.contentItems.length; i++) {
-                this.contentItems[i].element.style.width = numberToPixels(content.width);
-                this.contentItems[i].element.style.height = numberToPixels(content.height);
-            }
-            this.emit('resize');
-            this.emitBubblingEvent('stateChanged');
-        }
     }
 
     /** @internal */
@@ -190,7 +178,7 @@ export class Stack extends AbstractContentItem {
                         throw new Error(`Stack Content Item is not of type ComponentItem: ${i}: ${JSON.stringify(this._stackConfig)}`);
                     } else {
                         this._header.createTab(contentItem, i);
-                        contentItem._$hide();
+                        contentItem.hide();
                     }
                 }
 
@@ -206,7 +194,7 @@ export class Stack extends AbstractContentItem {
         this.initContentItems();
     }
 
-    /** @deprecated Use {$@link setActiveComponentItem()} */
+    /** @deprecated Use {@link setActiveComponentItem} */
     setActiveContentItem(item: AbstractContentItem): void {
         if (!AbstractContentItem.isComponentItem(item)) {
             throw new Error('Stack.setActiveContentItem: item is not a ComponentItem');
@@ -221,11 +209,11 @@ export class Stack extends AbstractContentItem {
                 throw new Error('componentItem is not a child of this stack');
             } else {
                 if (this._activeComponentItem !== undefined) {
-                    this._activeComponentItem._$hide();
+                    this._activeComponentItem.hide();
                 }
                 this._activeComponentItem = componentItem;
                 this._header.setActiveComponentItem(componentItem);
-                componentItem._$show();
+                componentItem.show();
                 this.emit('activeContentItemChanged', componentItem);
                 this.layoutManager.emit('activeContentItemChanged', componentItem);
                 this.emitBubblingEvent('stateChanged');
@@ -233,7 +221,7 @@ export class Stack extends AbstractContentItem {
         }
     }
 
-    /** @deprecated Use {$@link getActiveComponentItem} */
+    /** @deprecated Use {@link getActiveComponentItem} */
     getActiveContentItem(): AbstractContentItem | null {
         let result: AbstractContentItem | null;
         result = this.getActiveComponentItem();
@@ -247,6 +235,7 @@ export class Stack extends AbstractContentItem {
         return this._activeComponentItem;
     }
 
+    /** @internal */
     setDocked(value: Stack.Docker): void {
         if (!value.docked) {
             throw new AssertError('SSD3396');
@@ -255,6 +244,7 @@ export class Stack extends AbstractContentItem {
         }
     }
 
+    /** @internal */
     setUndocked(): void {
         this._docker = {
             docked: false,
@@ -264,10 +254,12 @@ export class Stack extends AbstractContentItem {
         }
     }
 
+    /** @internal */
     setDockable(value: boolean): void {
         this._header.setDockable(value);
     }
 
+    /** @internal */
     setRowColumnClosable(value: boolean): void {
         this._header.setRowColumnClosable(value);
     }
@@ -340,16 +332,9 @@ export class Stack extends AbstractContentItem {
     //     this.emitBubblingEvent('stateChanged');
     // }
 
-    protected processChildReplaced(index: number, newChild: AbstractContentItem): void {
-        if (!(newChild instanceof ComponentItem)) {
-            throw new AssertError('SPCR11056'); // Stacks can only have Component children
-        } else {
-            this._header.tabs[index].componentItem = newChild;
-        }
-    }
-
-    _$destroy(): void {
-        super._$destroy();
+    /** @internal */
+    destroy(): void {
+        super.destroy();
         this.off('resize', this._resizeListener);
         if (this._maximisedEnabled) {
             this.off('maximised', this._maximisedListener);
@@ -486,6 +471,7 @@ export class Stack extends AbstractContentItem {
      *
      * @param    x Absolute Screen X
      * @param    y Absolute Screen Y
+     * @internal
      */
     highlightDropZone(x: number, y: number): void {
         for (const key in this._contentAreaDimensions) {
@@ -496,10 +482,10 @@ export class Stack extends AbstractContentItem {
 
                 if (segment === Stack.Segment.Header) {
                     this._dropSegment = Stack.Segment.Header;
-                    this._highlightHeaderDropZone(this._header.leftRightSided ? y : x);
+                    this.highlightHeaderDropZone(this._header.leftRightSided ? y : x);
                 } else {
                     this.resetHeaderDropZone();
-                    this._highlightBodyDropZone(segment);
+                    this.highlightBodyDropZone(segment);
                 }
 
                 return;
@@ -507,6 +493,7 @@ export class Stack extends AbstractContentItem {
         }
     }
 
+    /** @internal */
     getArea(): AbstractContentItem.Area | null {
         if (this.element.style.display === 'none') {
             return null;
@@ -623,7 +610,72 @@ export class Stack extends AbstractContentItem {
         }
     }
 
-    _highlightHeaderDropZone(x: number): void {
+    toggleMaximise(ev?: Event): void {
+        if (!this.isMaximised) {
+            this.dock(false);
+        }
+        super.toggleMaximise(ev);
+    }
+
+    /**
+     * Programmatically operate with header position.
+     *
+     * @param position one of ('top','left','right','bottom') to set or empty to get it.
+     *
+     * @returns previous header position
+     * @internal
+     */
+    positionHeader(position: Side): void {
+        if (this._docker.docked) {
+            throw new Error('Can\'t change header position in docked stack');
+        }
+        if (this._header.side !== position) {
+            this._header.setSide(position);
+            this._headerSideChanged = true;
+            this.setupHeaderPosition();
+        }
+    }
+
+    /** @internal */
+    protected processChildReplaced(index: number, newChild: AbstractContentItem): void {
+        if (!(newChild instanceof ComponentItem)) {
+            throw new AssertError('SPCR11056'); // Stacks can only have Component children
+        } else {
+            this._header.tabs[index].componentItem = newChild;
+        }
+    }
+
+    /** @internal */
+    private updateNodeSize(): void {
+        if (this.element.style.display !== 'none') {
+            const isDocked = this._docker.docked;
+            const content: WidthAndHeight = getElementWidthAndHeight(this.element);
+
+            if (this._header.show) {
+                const dimension = this._header.leftRightSided ? WidthAndHeight.widthPropertyName : WidthAndHeight.heightPropertyName;
+                content[dimension] -= this.layoutManager.managerConfig.dimensions.headerHeight;
+            }
+            if (isDocked) {
+                content[this._docker.dimension] = this._docker.realSize;
+            }
+            if (!isDocked || this._docker.dimension === WidthAndHeight.heightPropertyName) {
+                this._childElementContainer.style.width = numberToPixels(content.width);
+            }
+            if (!isDocked || this._docker.dimension === WidthAndHeight.widthPropertyName) {
+                this._childElementContainer.style.height = numberToPixels(content.height);
+            }
+
+            for (let i = 0; i < this.contentItems.length; i++) {
+                this.contentItems[i].element.style.width = numberToPixels(content.width);
+                this.contentItems[i].element.style.height = numberToPixels(content.height);
+            }
+            this.emit('resize');
+            this.emitBubblingEvent('stateChanged');
+        }
+    }
+
+    /** @internal */
+    private highlightHeaderDropZone(x: number): void {
         const tabsLength = this._header.tabs.length;
 
         const dropTargetIndicator = this.layoutManager.dropTargetIndicator;
@@ -715,13 +767,7 @@ export class Stack extends AbstractContentItem {
         this.layoutManager.tabDropPlaceholder.remove();
     }
 
-    toggleMaximise(ev?: Event): void {
-        if (!this.isMaximised) {
-            this.dock(false);
-        }
-        super.toggleMaximise(ev);
-    }
-
+    /** @internal */
     private setupHeaderPosition() {
         setElementDisplayVisibility(this._header.element, this._header.show);
         this.element.classList.remove('lm_left', 'lm_right', 'lm_bottom');
@@ -734,25 +780,8 @@ export class Stack extends AbstractContentItem {
         this.updateSize();
     }
 
-    /**
-     * Programmatically operate with header position.
-     *
-     * @param position one of ('top','left','right','bottom') to set or empty to get it.
-     *
-     * @returns previous header position
-     */
-    positionHeader(position: Side): void {
-        if (this._docker.docked) {
-            throw new Error('Can\'t change header position in docked stack');
-        }
-        if (this._header.side !== position) {
-            this._header.setSide(position);
-            this._headerSideChanged = true;
-            this.setupHeaderPosition();
-        }
-    }
-
-    _highlightBodyDropZone(segment: Stack.Segment): void {
+    /** @internal */
+    private highlightBodyDropZone(segment: Stack.Segment): void {
         if (this._contentAreaDimensions === null) {
             throw new UnexpectedNullError('SHBDZC82265');
         } else {
@@ -767,59 +796,72 @@ export class Stack extends AbstractContentItem {
         }
     }
 
+    /** @internal */
     setParent(parent: AbstractContentItem): void {
         this._stackParent = parent as Stack.Parent;
         super.setParent(parent);
     }
 
+    /** @internal */
     private handleResize() {
         this._header.updateTabSizes()
     }
 
+    /** @internal */
     private handleMaximised() {
         this._header.processMaximised();
     }
 
+    /** @internal */
     private handleMinimised() {
         this._header.processMinimised();
     }
 
+    /** @internal */
     private onElementMouseEnter() {
         if (this._docker.docked) {
             this._childElementContainer.style[this._docker.dimension] = numberToPixels(this._docker.realSize);
         }
     }
 
+    /** @internal */
     private onElementMouseLeave() {
         if (this._docker.docked) {
             this._childElementContainer.style[this._docker.dimension] = numberToPixels(0);
         }
     }
 
+    /** @internal */
     private handleDockEvent() {
         this.dock();
     }
 
+    /** @internal */
     private handlePopoutEvent() {
         this.popout();
     }
 
+    /** @internal */
     private handleStateChangedEvent() {
         this.emitBubblingEvent('stateChanged');
     }
 
+    /** @internal */
     private handleHeaderClickTouchEvent() {
         this.select();
     }
 
+    /** @internal */
     private handleHeaderComponentRemoveEvent(item: ComponentItem) {
         this.removeChild(item, false);
     }
 
+    /** @internal */
     private handleHeaderComponentActivateEvent(item: ComponentItem) {
         this.setActiveComponentItem(item);
     }
 
+    /** @internal */
     private handleHeaderComponentStartDragEvent(x: number, y: number, dragListener: DragListener, componentItem: ComponentItem) {
         if (this.isMaximised === true) {
             this.toggleMaximise();
@@ -834,6 +876,7 @@ export class Stack extends AbstractContentItem {
         );
     }
 
+    /** @internal */
     private createHeaderConfig() {
         const currentHeaderConfig = this._stackConfig.header;
         if (!this._headerSideChanged) {
@@ -858,6 +901,7 @@ export class Stack extends AbstractContentItem {
     }
 }
 
+/** @internal */
 export namespace Stack {
     export const enum Segment {
         Header = 'header',
