@@ -135,7 +135,7 @@ export interface UserHeaderedItemConfig extends UserItemConfig {
     header?: UserHeaderedItemConfig.Header;
 }
 
-namespace UserHeaderedItemConfig {
+export namespace UserHeaderedItemConfig {
     export interface Header {
         show?: false | Side;
         popout?: false | string;
@@ -167,7 +167,7 @@ namespace UserHeaderedItemConfig {
 }
 
 export interface UserStackItemConfig extends UserHeaderedItemConfig {
-    type: ItemConfig.Type.stack;
+    type: 'stack';
     content: UserComponentItemConfig[];
     /** The index of the item in content which is to be active*/
     activeItemIndex?: number;
@@ -213,7 +213,7 @@ export namespace UserStackItemConfig {
 }
 
 export interface UserComponentItemConfig extends UserHeaderedItemConfig {
-    readonly content: [];
+    readonly content?: [];
     /**
      * The name of the component as specified in layout.registerComponent. Mandatory if type is 'component'.
      */
@@ -221,7 +221,7 @@ export interface UserComponentItemConfig extends UserHeaderedItemConfig {
 }
 
 export interface UserSerialisableComponentConfig extends UserComponentItemConfig {
-    type: ItemConfig.Type.component;
+    type: 'component';
     /**
      * A serialisable object. Will be passed to the component constructor function and will be the value returned by
      * container.getState().
@@ -255,7 +255,7 @@ export namespace UserSerialisableComponentConfig {
 }
 
 export interface UserReactComponentConfig extends UserComponentItemConfig {
-    type: ItemConfig.Type.reactComponent;
+    type: 'react-component';
     component?: string;
     /**
      * Properties that will be passed to the component and accessible using this.props.
@@ -337,7 +337,7 @@ export namespace UserRowOrColumnOrStackParentItemConfig {
 }
 
 export interface UserRowOrColumnItemConfig extends UserRowOrColumnOrStackParentItemConfig {
-    type: ItemConfig.Type.row | ItemConfig.Type.column;
+    type: 'row' | 'column';
 }
 
 export namespace UserRowOrColumnItemConfig {

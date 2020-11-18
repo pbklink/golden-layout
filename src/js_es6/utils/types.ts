@@ -16,12 +16,12 @@ export interface LeftAndTop {
     top: number;    
 }
 
-/** @internal */
-export const enum Side {
-    top = 'top',
-    left = 'left',
-    right = 'right',
-    bottom = 'bottom',
+export type Side = 'top' | 'left' | 'right' | 'bottom';
+export namespace Side {
+    export const top = 'top';
+    export const left = 'left';
+    export const right = 'right';
+    export const bottom = 'bottom';
 }
 
 /** @internal */

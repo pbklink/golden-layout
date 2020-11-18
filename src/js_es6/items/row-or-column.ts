@@ -22,7 +22,7 @@ export class RowOrColumn extends ContentItem {
     /** @internal */
     private readonly _childElementContainer: HTMLElement;
     /** @internal */
-    private readonly _configType: ItemConfig.Type.row | ItemConfig.Type.column;
+    private readonly _configType: 'row' | 'column';
     /** @internal */
     private readonly _isColumn: boolean;
     /** @internal */
@@ -293,7 +293,7 @@ export class RowOrColumn extends ContentItem {
         } else { // dock
             if (this.contentItems.length - this.calculateDockedCount() < 2)
                 throw new AssertError('Can\'t dock child when it is last in ' + this.config.type);
-            const autoside = {
+            const autoside: {[columnRow: string]: { [firstLast: string]: Side }} = {
                 column: {
                     first: Side.top,
                     last: Side.bottom,

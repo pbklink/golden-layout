@@ -36,7 +36,8 @@
     "test": "cross-env karma start",
     "coverage": "karma start --single-run --no-auto-watch --coverage=true || echo done",
     "doc:full": "npx del-cli doc/full && typedoc --options ./typedoc.full.json",
-    "doc:strip": "npx del-cli doc/strip && typedoc --options ./typedoc.stripInternal.json"
+    "doc:strip": "npx del-cli doc/strip && typedoc --options ./typedoc.stripInternal.json",
+    "apitest": "webpack-dev-server --env.dev --mode development --config ./api-test/webpack.config.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",

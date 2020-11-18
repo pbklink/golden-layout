@@ -21,13 +21,15 @@ export interface ItemConfig {
 }
 
 export namespace ItemConfig {
-    export const enum Type {
-        root = 'root',
-        row = 'row',
-        column = 'column',
-        stack = 'stack',
-        component = 'component',
-        reactComponent = 'react-component',
+    export type Type = 'root' | 'row' | 'column' | 'stack' | 'component' | 'react-component';
+
+    export namespace Type {
+        export const root = 'root';
+        export const row = 'row';
+        export const column = 'column';
+        export const stack = 'stack';
+        export const component = 'component';
+        export const reactComponent = 'react-component';
     }
 
     export type HeightOrWidthPropertyName = 'height' | 'width';
@@ -144,7 +146,7 @@ export namespace HeaderedItemConfig {
 }
 
 export interface StackItemConfig extends HeaderedItemConfig {
-    readonly type: ItemConfig.Type.stack;
+    readonly type: 'stack';
     readonly content: ComponentItemConfig[];
     activeItemIndex: number;
 }
@@ -217,7 +219,7 @@ export namespace ComponentItemConfig {
 
 export interface SerialisableComponentConfig extends ComponentItemConfig {
     // see UserJsonComponentConfig for comments
-    readonly type: ItemConfig.Type.component;
+    readonly type: 'component';
     componentState: JsonValue;
 }
 
@@ -263,7 +265,7 @@ export namespace SerialisableComponentConfig {
 
 export interface ReactComponentConfig extends ComponentItemConfig {
     // see UserReactComponentConfig for comments
-    readonly type: ItemConfig.Type.reactComponent;
+    readonly type: 'react-component';
     readonly component: string;
     props?: unknown;
 }
@@ -381,11 +383,11 @@ export namespace RowOrColumnOrStackParentItemConfig {
 }
 
 export interface RowOrColumnItemConfig extends RowOrColumnOrStackParentItemConfig {
-    readonly type: ItemConfig.Type.row | ItemConfig.Type.column;
+    readonly type: 'row' | 'column';
 }
 
 export interface RootItemConfig extends RowOrColumnOrStackParentItemConfig {
-    readonly type: ItemConfig.Type.root;
+    readonly type: 'root';
 }
 
 export interface ManagerConfig {
@@ -420,10 +422,11 @@ export namespace ManagerConfig {
     }
 
     export namespace Settings {
-        export const enum ResponsiveMode {
-            none = 'none',
-            always = 'always',
-            onload = 'onload',
+        export type ResponsiveMode = 'none' | 'always' | 'onload';
+        export namespace ResponsiveMode {
+            export const none = 'none';
+            export const always = 'always';
+            export const onload = 'onload';
         }
 
         export const defaults: ManagerConfig.Settings = {
