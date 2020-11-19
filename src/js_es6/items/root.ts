@@ -7,6 +7,7 @@ import { ComponentItem } from './component-item';
 import { ContentItem } from './content-item';
 import { RowOrColumn } from './row-or-column';
 
+/** @public */
 export class Root extends ContentItem {
     /** @internal */
     private readonly _childElementContainer;
@@ -193,12 +194,14 @@ export class Root extends ContentItem {
     }
 }
 
-/** @internal */
+/** @public */
 export namespace Root {
+    /** @internal */
     export interface Area extends ContentItem.Area {
         side: keyof typeof Area.Side;
     }
 
+    /** @internal */
     export namespace Area {
         export const enum Side {
             y2,
@@ -217,5 +220,6 @@ export namespace Root {
         };
     }
 
+    /** @internal */
     export const templateHtml = '<div class="lm_goldenlayout lm_item lm_root"></div>';
 }

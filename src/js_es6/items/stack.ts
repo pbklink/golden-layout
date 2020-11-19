@@ -17,8 +17,7 @@ import {
 import { ComponentItem } from './component-item';
 import { ContentItem } from './content-item';
 
-
-
+/** @public */
 export class Stack extends ContentItem {
     /** @internal */
     private readonly _header: Header;
@@ -194,7 +193,7 @@ export class Stack extends ContentItem {
         this.initContentItems();
     }
 
-    /** @deprecated Use {@link setActiveComponentItem} */
+    /** @deprecated Use {@link (Stack:class).setActiveComponentItem} */
     setActiveContentItem(item: ContentItem): void {
         if (!ContentItem.isComponentItem(item)) {
             throw new Error('Stack.setActiveContentItem: item is not a ComponentItem');
@@ -221,7 +220,7 @@ export class Stack extends ContentItem {
         }
     }
 
-    /** @deprecated Use {@link getActiveComponentItem} */
+    /** @deprecated Use {@link (Stack:class).getActiveComponentItem} */
     getActiveContentItem(): ContentItem | null {
         let result: ContentItem | null;
         result = this.getActiveComponentItem();
@@ -358,7 +357,7 @@ export class Stack extends ContentItem {
     }
 
     /**
-     * Ok, this one is going to be the tricky one: The user has dropped {contentItem} onto this stack.
+     * Ok, this one is going to be the tricky one: The user has dropped a {@link (ContentItem:class)} onto this stack.
      *
      * It was dropped on either the stacks header or the top, right, bottom or left bit of the content area
      * (which one of those is stored in this._dropSegment). Now, if the user has dropped on the header the case
@@ -469,8 +468,8 @@ export class Stack extends ContentItem {
      * If the user hovers above the header part of the stack, indicate drop positions for tabs.
      * otherwise indicate which segment of the body the dragged item would be dropped on
      *
-     * @param    x Absolute Screen X
-     * @param    y Absolute Screen Y
+     * @param x - Absolute Screen X
+     * @param y - Absolute Screen Y
      * @internal
      */
     highlightDropZone(x: number, y: number): void {
@@ -620,7 +619,7 @@ export class Stack extends ContentItem {
     /**
      * Programmatically operate with header position.
      *
-     * @param position one of ('top','left','right','bottom') to set or empty to get it.
+     * @param position -
      *
      * @returns previous header position
      * @internal
@@ -641,7 +640,7 @@ export class Stack extends ContentItem {
         if (!(newChild instanceof ComponentItem)) {
             throw new AssertError('SPCR11056'); // Stacks can only have Component children
         } else {
-            this._header.tabs[index].componentItem = newChild;
+            this._header.tabs[index].setComponentItem(newChild);
         }
     }
 
@@ -901,8 +900,9 @@ export class Stack extends ContentItem {
     }
 }
 
-/** @internal */
+/** @public */
 export namespace Stack {
+    /** @internal */
     export const enum Segment {
         Header = 'header',
         Body = 'body',
@@ -912,15 +912,18 @@ export namespace Stack {
         Bottom = 'bottom',
     }
 
+    /** @internal */
     export interface ContentAreaDimension {
         hoverArea: AreaLinkedRect;
         highlightArea: AreaLinkedRect;
     }
 
+    /** @internal */
     export type ContentAreaDimensions = {
         [segment: string]: ContentAreaDimension;
     };
 
+    /** @internal */
     export interface Docker {
         docked: boolean;
         dimension: ItemConfig.HeightOrWidthPropertyName;
@@ -933,5 +936,6 @@ export namespace Stack {
         validateDocking(): void;
     }
 
+    /** @internal */
     export const templateHtml = '<div class="lm_item lm_stack"></div>';
 }

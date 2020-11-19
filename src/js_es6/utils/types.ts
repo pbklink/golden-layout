@@ -16,6 +16,7 @@ export interface LeftAndTop {
     top: number;    
 }
 
+/** @public */
 export type Side = 'top' | 'left' | 'right' | 'bottom';
 export namespace Side {
     export const top = 'top';
@@ -40,8 +41,11 @@ export interface AreaLinkedRect {
     y2: number, // nextTop
 }
 
+/** @public */
 export type JsonValue = string | number | boolean | null | undefined | Json | JsonValueArray;
+/** @public */
 export interface Json {
     [name: string]: JsonValue;
 }
+/** @public */
 export type JsonValueArray = Array<JsonValue>

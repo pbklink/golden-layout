@@ -1,11 +1,13 @@
 import { AssertError } from '../errors/internal-error';
 
+/** @public */
 export const enum I18nStringId {
     PopoutCannotBeCreatedWithRootItemConfig,
     PleaseRegisterAConstructorFunction,
     ComponentIsAlreadyRegistered,
 }
 
+/** @public */
 export namespace I18nStrings {
     /** @internal */
     let initialised = false;
@@ -54,4 +56,5 @@ export namespace I18nStrings {
     }
 }
 
+/** @public */
 export const i18nStrings = new Array<string>(I18nStrings.idCount);

@@ -2,6 +2,7 @@ import { AssertError, UnreachableCaseError } from '../errors/internal-error';
 import { JsonValue, Side } from '../utils/types';
 import { deepExtendValue } from '../utils/utils';
 
+/** @public */
 export interface ItemConfig {
     // see UserItemConfig for comments
     readonly type: ItemConfig.Type;
@@ -20,6 +21,7 @@ export interface ItemConfig {
     readonly reorderEnabled: boolean; // Takes precedence over ManagerConfig.reorderEnabled. Should be settings.reorderEnabled
 }
 
+/** @public */
 export namespace ItemConfig {
     export type Type = 'root' | 'row' | 'column' | 'stack' | 'component' | 'react-component';
 
@@ -34,6 +36,7 @@ export namespace ItemConfig {
 
     export type HeightOrWidthPropertyName = 'height' | 'width';
 
+    /** @internal */
     export const defaults: ItemConfig = {
         type: ItemConfig.Type.root, // not really default but need something
         content: [],
@@ -110,10 +113,12 @@ export namespace ItemConfig {
 }
 
 // Stack or Component
+/** @public */
 export interface HeaderedItemConfig extends ItemConfig {
     header: HeaderedItemConfig.Header | undefined; // undefined means get header settings from ManagerConfig
 }
 
+/** @public */
 export namespace HeaderedItemConfig {
     export interface Header {
         // undefined means get property value from ManagerConfig
@@ -145,12 +150,14 @@ export namespace HeaderedItemConfig {
     }
 }
 
+/** @public */
 export interface StackItemConfig extends HeaderedItemConfig {
     readonly type: 'stack';
     readonly content: ComponentItemConfig[];
     activeItemIndex: number;
 }
 
+/** @public */
 export namespace StackItemConfig {
     export const defaultActiveItemIndex = 0;
 
@@ -200,6 +207,7 @@ export namespace StackItemConfig {
     }
 }
 
+/** @public */
 export interface ComponentItemConfig extends HeaderedItemConfig {
     readonly content: [];
     /**
@@ -208,6 +216,7 @@ export interface ComponentItemConfig extends HeaderedItemConfig {
     readonly componentName: string;
 }
 
+/** @public */
 export namespace ComponentItemConfig {
     export function isReact(config: ComponentItemConfig): config is ReactComponentConfig {
         return config.type === ItemConfig.Type.reactComponent;
@@ -217,12 +226,14 @@ export namespace ComponentItemConfig {
     }
 }
 
+/** @public */
 export interface SerialisableComponentConfig extends ComponentItemConfig {
     // see UserJsonComponentConfig for comments
     readonly type: 'component';
     componentState: JsonValue;
 }
 
+/** @public */
 export namespace SerialisableComponentConfig {
     export function createCopy(original: SerialisableComponentConfig): SerialisableComponentConfig {
         const result: SerialisableComponentConfig = {
@@ -263,6 +274,7 @@ export namespace SerialisableComponentConfig {
     }
 }
 
+/** @public */
 export interface ReactComponentConfig extends ComponentItemConfig {
     // see UserReactComponentConfig for comments
     readonly type: 'react-component';
@@ -270,6 +282,7 @@ export interface ReactComponentConfig extends ComponentItemConfig {
     props?: unknown;
 }
 
+/** @public */
 export namespace ReactComponentConfig {
     export const REACT_COMPONENT_ID = 'lm-react-component'
 
@@ -314,7 +327,9 @@ export namespace ReactComponentConfig {
     }
 }
 
-/** Base for Root or RowOrColumn ItemConfigs */
+/** Base for Root or RowOrColumn ItemConfigs
+ * @public
+ */
 export interface RowOrColumnOrStackParentItemConfig extends ItemConfig {
     /** Note that Root and RowOrColumn ItemConfig contents, can contain ComponentItem itemConfigs.  However
      * when ContentItems are created, these ComponentItem itemConfigs will create a Stack with a child ComponentItem.
@@ -322,6 +337,7 @@ export interface RowOrColumnOrStackParentItemConfig extends ItemConfig {
     readonly content: readonly (RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig)[];
 }
 
+/** @public */
 export namespace RowOrColumnOrStackParentItemConfig {
     export type ChildItemConfig = RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig;
 
@@ -382,14 +398,17 @@ export namespace RowOrColumnOrStackParentItemConfig {
     }
 }
 
+/** @public */
 export interface RowOrColumnItemConfig extends RowOrColumnOrStackParentItemConfig {
     readonly type: 'row' | 'column';
 }
 
+/** @public */
 export interface RootItemConfig extends RowOrColumnOrStackParentItemConfig {
     readonly type: 'root';
 }
 
+/** @public */
 export interface ManagerConfig {
     readonly content: readonly (RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig)[];
     readonly openPopouts: PopoutManagerConfig[];
@@ -403,6 +422,7 @@ export interface ManagerConfig {
     readonly maximisedItemId: string | null;
 }
 
+/** @public */
 export namespace ManagerConfig {
     export interface Settings {
         // see UserConfig.Settings for comments
@@ -429,6 +449,7 @@ export namespace ManagerConfig {
             export const onload = 'onload';
         }
 
+        /** @internal */
         export const defaults: ManagerConfig.Settings = {
             constrainDragToContainer: true,
             reorderEnabled: true,
@@ -488,6 +509,7 @@ export namespace ManagerConfig {
             }
         }
 
+        /** @internal */
         export const defaults: ManagerConfig.Dimensions = {
             borderWidth: 5,
             borderGrabWidth: 15,
@@ -522,6 +544,7 @@ export namespace ManagerConfig {
             }
         }
 
+        /** @internal */
         export const defaults: ManagerConfig.Header = {
             show: Side.top,
             popout: 'open in new window',
@@ -572,12 +595,14 @@ export namespace ManagerConfig {
     }
 }
 
+/** @public */
 export interface PopoutManagerConfig extends ManagerConfig {
     readonly parentId: string | null;
     readonly indexInParent: number | null;
     readonly window: PopoutManagerConfig.Window;
 }
 
+/** @public */
 export namespace PopoutManagerConfig {
     export interface Window {
         readonly width: number | null,
@@ -596,6 +621,7 @@ export namespace PopoutManagerConfig {
             }
         }
 
+        /** @internal */
         export const defaults: PopoutManagerConfig.Window = {
             width: null,
             height: null,
@@ -620,10 +646,12 @@ export namespace PopoutManagerConfig {
     }
 }
 
+/** @public */
 export interface Config extends ManagerConfig {
     readonly resolved: true,
 }
 
+/** @public */
 export namespace Config {
 
     export function createCopy(original: Config): Config {

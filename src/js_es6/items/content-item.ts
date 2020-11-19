@@ -15,6 +15,7 @@ import { Stack } from './stack'
  * Most methods provide a subset of what the sub-classes do.
  *
  * It also provides a number of functions for tree traversal
+ * @public
  */
 
 export abstract class ContentItem extends EventEmitter {
@@ -144,9 +145,9 @@ export abstract class ContentItem extends EventEmitter {
      * The responsibility for the actual DOM manipulations lies
      * with the concrete item
      *
-     * @param contentItem
-     * @param index If omitted item will be appended
-     * @param suspendResize Used by descendent implementations
+     * @param contentItem -
+     * @param index - If omitted item will be appended
+     * @param suspendResize - Used by descendent implementations
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     addChild(contentItem: ContentItem, index?: number | null, suspendResize?: boolean): void {
@@ -176,10 +177,8 @@ export abstract class ContentItem extends EventEmitter {
      * Replaces oldChild with newChild. This used to use jQuery.replaceWith... which for
      * some reason removes all event listeners, so isn't really an option.
      *
-     * @param   {ContentItem} oldChild
-     * @param   {ContentItem} newChild
-     *
-     * @returns {void}
+     * @param oldChild -
+     * @param newChild -
      */
     replaceChild(oldChild: ContentItem, newChild: ContentItem, _$destroyOldChild = false): void {
 
@@ -293,9 +292,7 @@ export abstract class ContentItem extends EventEmitter {
      * Set this component's title
      *
      * @public
-     * @param {String} title
-     *
-     * @returns {void}
+     * @param title -
      */
     setTitle(title: string): void {
         this._config.title = title;
@@ -306,7 +303,7 @@ export abstract class ContentItem extends EventEmitter {
     /**
      * Checks whether a provided id is present
      *
-     * @param   id
+     * @param id -
      *
      * @returns isPresent
      */
@@ -532,8 +529,8 @@ export abstract class ContentItem extends EventEmitter {
      * Called for every event on the item tree. Decides whether the event is a bubbling
      * event and propagates it to its parent
      *
-     * @param    name the name of the event
-     * @param   event
+     * @param name - The name of the event
+     * @param event -
      * @internal
      */
     private propagateEvent(name: string, args: unknown[]) {
@@ -563,7 +560,7 @@ export abstract class ContentItem extends EventEmitter {
      * are propagated to - and emitted by - the layoutManager however are
      * only string-based, batched and sanitized to make them more usable
      *
-     * @param {String} name the name of the event
+     * @param name - The name of the event
      * @internal
      */
     private scheduleEventPropagationToLayoutManager(name: string, event: EventEmitter.BubblingEvent) {
@@ -581,7 +578,7 @@ export abstract class ContentItem extends EventEmitter {
     /**
      * Callback for events scheduled by _scheduleEventPropagationToLayoutManager
      *
-     * @param name the name of the event
+     * @param name - The name of the event
      * @internal
      */
     private propagateEventToLayoutManager(name: string, event: EventEmitter.BubblingEvent) {
@@ -590,13 +587,14 @@ export abstract class ContentItem extends EventEmitter {
     }
 }
 
-/** @internal */
+/** @public */
 export namespace ContentItem {
+    /** @internal */
     export interface Area extends AreaLinkedRect {
         surface: number;
         contentItem: ContentItem;
     }
 }
 
-/** @deprecated Use {@link ContentItem} */
+/** @public @deprecated Use {@link (ContentItem:class)} */
 export type AbstractContentItem = ContentItem;

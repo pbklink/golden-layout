@@ -8,6 +8,7 @@ import { createTemplateHtmlElement, deepExtend, getElementWidthAndHeight } from 
 import { ContentItem } from './content-item';
 import { Stack } from './stack';
 
+/** @public */
 export class ComponentItem extends ContentItem {
     /** @internal */
     private readonly _componentName: string;
@@ -135,9 +136,10 @@ export class ComponentItem extends ContentItem {
     }
 }
 
-/** @deprecated use {@link ComponentItem} */
+/** @public @deprecated use {@link (ComponentItem:class)} */
 export type Component = ComponentItem;
 
+/** @public */
 export namespace ComponentItem {
     export type Component = unknown;
     export type ComponentConstructor = new(container: ComponentContainer, state: unknown) => Component;

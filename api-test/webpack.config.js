@@ -12,20 +12,19 @@ module.exports = {
 
     output: {
         filename: '[name].bundle.js',
-        path: path.resolve(__dirname, 'api-test/dist/'),
+        path: path.resolve(__dirname, 'dist/'),
     },
 
-    watch: true,
     devtool: "cheap-module-source-map",
+    devtool: 'inline-source-map',
+
     devServer: {
         port: 3000,
         index: "api-test/index.html"
     },
 
-    devtool: 'inline-source-map',
-
     resolve: {
-        extensions: ['.ts', '.d.ts', '.js', '.json']
+        extensions: ['.ts', '.js'],
     },
 
     module: {
@@ -41,16 +40,6 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: ["@babel/preset-env"],
-                    },
-                },
-            },
-            {
                 test: /\.less$/,
                 use: [
                     {
@@ -63,28 +52,6 @@ module.exports = {
                         loader: "less-loader",
                     }
                 ],
-            },
-            {
-                test: /.*\.(gif|png|jpe?g|svg)$/i,
-                use: [
-                    {
-                        loader: "file-loader",
-                        options: {
-                            name: "assets/[name].[ext]"
-                        }
-                    }
-                ]
-            },
-            {
-                test: /\.(woff2?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [
-                    {
-                        loader: "file-loader",
-                        options: {
-                            name: path.join("assets", "[name].[ext]")
-                        }
-                    }
-                ]
             }
         ]
     },

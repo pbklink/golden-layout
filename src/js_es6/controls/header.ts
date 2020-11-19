@@ -20,6 +20,7 @@ const _template =
 
 /**
  * This class represents a header above a Stack ContentItem.
+ * @public
  */
 export class Header extends EventEmitter {
     /** @internal */
@@ -106,7 +107,7 @@ export class Header extends EventEmitter {
     /**
      * Caution: Returns active Tab but not necessarily Stack.activeComponentItem
      * Active Tab may not equal Stack.activeContentItem if Header.setActiveContentItem() is used
-     * @deprecated use {@link Stack.getActiveComponentItem} */
+     * @deprecated use {@link (Stack:class).getActiveComponentItem} */
     get activeContentItem(): ContentItem | null {
         if (this._activeComponentItem === undefined) {
             return null;
@@ -116,10 +117,10 @@ export class Header extends EventEmitter {
     }
     get element(): HTMLElement { return this._element; }
     get tabsContainerElement(): HTMLElement { return this._tabsContainerElement; }
-    /** @deprecated use {@link tabsContainerElement} */
+    /** @deprecated use {@link (Header:class).tabsContainerElement} */
     get tabsContainer(): HTMLElement { return this._tabsContainerElement; }
     get controlsContainerElement(): HTMLElement { return this._controlsContainerElement; }
-    /** @deprecated use {@link controlsContainerElement} */
+    /** @deprecated use {@link (Header:class).controlsContainerElement} */
     get controlsContainer(): HTMLElement { return this._controlsContainerElement; }
 
     /** @internal */
@@ -213,7 +214,7 @@ export class Header extends EventEmitter {
 
     /**
      * Creates a new tab and associates it with a contentItem
-     * @param index The position of the tab
+     * @param index - The position of the tab
      */
     createTab(componentItem: ComponentItem, index: number): void {
         //If there's already a tab relating to the
@@ -252,7 +253,7 @@ export class Header extends EventEmitter {
 
     /**
      * Finds a tab based on the contentItem its associated with and removes it.
-     * @param    componentItem
+     * @param componentItem -
      */
     removeTab(componentItem: ContentItem): void {
         for (let i = 0; i < this._tabs.length; i++) {
@@ -273,7 +274,7 @@ export class Header extends EventEmitter {
 
     /**
      * Caution: Will not change Stack ActiveContentItem
-     * @deprecated use {@link Stack.setActiveComponentItem}
+     * @deprecated use {@link (Stack:class).setActiveComponentItem}
      */
     setActiveContentItem(item: ContentItem): void {
         if (!ContentItem.isComponentItem(item)) {
@@ -329,7 +330,7 @@ export class Header extends EventEmitter {
 
     /**
      * Programmatically set closability.
-     * @param value Whether to enable/disable closability.
+     * @param value - Whether to enable/disable closability.
      * @returns Whether the action was successful
      * @internal
      */
@@ -375,7 +376,7 @@ export class Header extends EventEmitter {
 
     /**
      * Programmatically set ability to dock.
-     * @param isDockable Whether to enable/disable ability to dock.
+     * @param isDockable - Whether to enable/disable ability to dock.
      * @returns Whether the action was successful
      * @internal
      */
@@ -681,18 +682,28 @@ export class Header extends EventEmitter {
     }
 }
 
-/** @internal */
+/** @public */
 export namespace Header {
+    /** @internal */
     export type CloseEvent = (this: void) => void;
+    /** @internal */
     export type DockEvent = (this: void) => void;
+    /** @internal */
     export type PopoutEvent = (this: void) => void;
+    /** @internal */
     export type MaximiseToggleEvent = (this: void, ev: Event) => void;
+    /** @internal */
     export type HeaderClickTouchEvent = (this: void) => void;
+    /** @internal */
     export type ComponentRemoveEvent = (this: void, componentItem: ComponentItem) => void;
+    /** @internal */
     export type ComponentActivateEvent = (this: void, componentItem: ComponentItem) => void;
+    /** @internal */
     export type ComponentDragStartEvent = (this: void, x: number, y: number, dragListener: DragListener, componentItem: ComponentItem) => void;
+    /** @internal */
     export type StateChangedEvent = (this: void) => void;
 
+    /** @internal */
     export interface Settings {
         show: boolean;
         side: Side;

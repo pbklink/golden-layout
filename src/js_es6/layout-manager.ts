@@ -44,6 +44,7 @@ declare global {
  * The main class that will be exposed as GoldenLayout.
  */
 
+/** @public */
 export abstract class LayoutManager extends EventEmitter {
     /** @internal */
     private _container: HTMLElement;
@@ -119,7 +120,7 @@ export abstract class LayoutManager extends EventEmitter {
     get tabDropPlaceholder(): HTMLElement { return this._tabDropPlaceholder; }
 
     /**
-    * @param container a Dom HTML element. Defaults to body
+    * @param container - A Dom HTML element. Defaults to body
     * @internal
     */
     constructor(managerConfigAndIsSubWindow: LayoutManager.ManagerConfigAndIsSubWindow, container?: HTMLElement) {        
@@ -155,12 +156,11 @@ export abstract class LayoutManager extends EventEmitter {
     }
 
     /**
-     * Register a component with the layout manager. If a configuration node
-     * of type component is reached it will look up componentName and create the
-     * associated component
+     * Register a new component type with the layout manager.
      *
-     * @deprecated See https://stackoverflow.com/questions/40922531/how-to-check-if-a-javascript-function-is-a-constructor
-     * @see {@link registerComponentWithConstructor} or {@link registerComponentWithFactoryFunction}
+     * @deprecated See {@link https://stackoverflow.com/questions/40922531/how-to-check-if-a-javascript-function-is-a-constructor}
+     * instead use {@link (LayoutManager:class).registerComponentWithConstructor}
+     * or {@link (LayoutManager:class).registerComponentWithFactoryFunction}
      */
     registerComponent(name: string,
         componentConstructorOrFactoryFtn: ComponentItem.ComponentConstructor | ComponentItem.ComponentFactoryFunction
@@ -179,16 +179,7 @@ export abstract class LayoutManager extends EventEmitter {
     }
 
     /**
-     * Register a component with the layout manager. If a configuration node
-     * of type component is reached it will look up componentName and create the
-     * associated component
-     *
-     *  {
-     *    type: "component",
-     *    componentName: "EquityNewsFeed",
-     *    componentState: { "feedTopic": "us-bluechips" }
-     *  }
-     *
+     * Register a new component type with the layout manager.
      */
     registerComponentWithConstructor(name: string, componentConstructor: ComponentItem.ComponentConstructor): void {
         if (typeof componentConstructor !== 'function') {
@@ -206,16 +197,7 @@ export abstract class LayoutManager extends EventEmitter {
     }
 
     /**
-     * Register a component with the layout manager. If a configuration node
-     * of type component is reached it will look up componentName and create the
-     * associated component
-     *
-     *  {
-     *    type: "component",
-     *    componentName: "EquityNewsFeed",
-     *    componentState: { "feedTopic": "us-bluechips" }
-     *  }
-     *
+     * Register a new component with the layout manager.
      */
     registerComponentWithFactoryFunction(name: string, componentFactoryFunction: ComponentItem.ComponentFactoryFunction): void {
         if (typeof componentFactoryFunction !== 'function') {
@@ -344,7 +326,7 @@ export abstract class LayoutManager extends EventEmitter {
         this.emit('initialised');
     }
 
-    /** @deprecated Use {@link setSize} */
+    /** @deprecated Use {@link (LayoutManager:class).setSize} */
     updateSize(width: number, height: number): void {
         this.setSize(width, height);
     }
@@ -352,8 +334,8 @@ export abstract class LayoutManager extends EventEmitter {
     /**
      * Updates the layout managers size
      *
-     * @param width  width in pixels
-     * @param height height in pixels
+     * @param width - Width in pixels
+     * @param height - Height in pixels
      */
     setSize(width: number, height: number): void {
         this._width = width;
@@ -436,8 +418,8 @@ export abstract class LayoutManager extends EventEmitter {
      * Recursively creates new item tree structures based on a provided
      * ItemConfiguration object
      *
-     * @param   config ItemConfig
-     * @param   parent The item the newly created item should be a child of
+     * @param config - ItemConfig
+     * @param parent - The item the newly created item should be a child of
      * @internal
      */
     createContentItem(config: ItemConfig, parent: ContentItem): ContentItem {
@@ -491,11 +473,11 @@ export abstract class LayoutManager extends EventEmitter {
     /**
      * Creates a popout window with the specified content at the specified position
      *
-     * @param   itemConfigContentOrContentItem The content of the popout window's layout manager derived from either
-     * a {@link ContentItem ContentItem} or {@link ItemConfig} or ItemConfig content (array of {@link ItemConfig})
-     * @param   positionAndSize The width, height, left and top of Popout window
-     * @param   parentId The id of the element this item will be appended to when popIn is called
-     * @param   indexInParent The position of this item within its parent element
+     * @param itemConfigContentOrContentItem - The content of the popout window's layout manager derived from either
+     * a {@link (ContentItem:class)} or {@link (ItemConfig:interface)} or ItemConfig content (array of {@link (ItemConfig:interface)})
+     * @param positionAndSize - The width, height, left and top of Popout window
+     * @param parentId -The id of the element this item will be appended to when popIn is called
+     * @param indexInParent - The position of this item within its parent element
      */
 
     createPopout(itemConfigContentOrContentItem: ContentItem | ItemConfig | ItemConfig[],
@@ -638,8 +620,8 @@ export abstract class LayoutManager extends EventEmitter {
      * and turns it into a way of creating new ContentItems
      * by 'dragging' the DOM element into the layout
      *
-     * @param   element
-     * @param   itemConfig for the new item to be created, or a function which will provide it
+     * @param element -
+     * @param itemConfig - For the new item to be created, or a function which will provide it
      *
      * @returns 1) an opaque object that identifies the DOM element
 	 *          and the attached itemConfig. This can be used in
@@ -671,9 +653,8 @@ export abstract class LayoutManager extends EventEmitter {
      * the currently selected item, selects the specified item
      * and emits a selectionChanged event
      *
-     * @param   item
-     * @param   silent Wheather to notify the item of its selection
-     * @event   selectionChanged
+     * @param item -
+     * @param silent - Whether to notify the item of its selection
      */
     selectItem(item: ContentItem, silent: boolean): void {
 
@@ -995,7 +976,7 @@ export abstract class LayoutManager extends EventEmitter {
     /**
      * Kicks of the initial, recursive creation chain
      *
-     * @param   managerConfig GoldenLayout Config
+     * @param managerConfig - GoldenLayout Config
      * @internal
      */
     private create(managerConfig: ManagerConfig) {
@@ -1153,8 +1134,8 @@ export abstract class LayoutManager extends EventEmitter {
     /**
      * Finds all the stack containers.
      *
-     * @param stacks Set of containers to populate.
-     * @param node Current node to process.
+     * @param stacks - Set of containers to populate.
+     * @param node - Current node to process.
      * @internal
      */
     private findAllStacksRecursive(stacks: Stack[], node: ContentItem) {
@@ -1172,6 +1153,7 @@ export abstract class LayoutManager extends EventEmitter {
     }
 }
 
+/** @public */
 export namespace LayoutManager {
     export type GetComponentConstructorFtn = (this: void, config: ComponentItemConfig) => ComponentItem.ComponentConstructor
 

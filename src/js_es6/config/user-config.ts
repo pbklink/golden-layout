@@ -15,6 +15,7 @@ import {
     StackItemConfig
 } from './config';
 
+/** @public */
 export interface UserItemConfig {
     /**
      * The type of the item. Possible values are 'row', 'column', 'stack', 'component' and 'react-component'.
@@ -72,6 +73,7 @@ export interface UserItemConfig {
     reorderEnabled?: boolean;  // Takes precedence over UserManagerConfig.reorderEnabled. Should be settings.reorderEnabled
 }
 
+/** @public */
 export namespace UserItemConfig {
     export function resolve(user: UserItemConfig): ItemConfig {
         switch (user.type) {
@@ -129,12 +131,14 @@ export namespace UserItemConfig {
 }
 
 // Stack or Component
+/** @public */
 export interface UserHeaderedItemConfig extends UserItemConfig {
     /** @deprecated use Header.show instead */
     hasHeaders?: boolean;
     header?: UserHeaderedItemConfig.Header;
 }
 
+/** @public */
 export namespace UserHeaderedItemConfig {
     export interface Header {
         show?: false | Side;
@@ -166,6 +170,7 @@ export namespace UserHeaderedItemConfig {
     }
 }
 
+/** @public */
 export interface UserStackItemConfig extends UserHeaderedItemConfig {
     type: 'stack';
     content: UserComponentItemConfig[];
@@ -173,6 +178,7 @@ export interface UserStackItemConfig extends UserHeaderedItemConfig {
     activeItemIndex?: number;
 }
 
+/** @public */
 export namespace UserStackItemConfig {
     export function resolve(user: UserStackItemConfig): StackItemConfig {
         const result: StackItemConfig = {
@@ -212,6 +218,7 @@ export namespace UserStackItemConfig {
     }
 }
 
+/** @public */
 export interface UserComponentItemConfig extends UserHeaderedItemConfig {
     readonly content?: [];
     /**
@@ -220,6 +227,7 @@ export interface UserComponentItemConfig extends UserHeaderedItemConfig {
     componentName: string;
 }
 
+/** @public */
 export interface UserSerialisableComponentConfig extends UserComponentItemConfig {
     type: 'component';
     /**
@@ -229,6 +237,7 @@ export interface UserSerialisableComponentConfig extends UserComponentItemConfig
     componentState?: JsonValue;
 }
 
+/** @public */
 export namespace UserSerialisableComponentConfig {
     export function resolve(user: UserSerialisableComponentConfig): SerialisableComponentConfig {
         if (user.componentName === undefined) {
@@ -254,6 +263,7 @@ export namespace UserSerialisableComponentConfig {
     }
 }
 
+/** @public */
 export interface UserReactComponentConfig extends UserComponentItemConfig {
     type: 'react-component';
     component?: string;
@@ -263,6 +273,7 @@ export interface UserReactComponentConfig extends UserComponentItemConfig {
     props?: JsonValue;
 }
 
+/** @public */
 export namespace UserReactComponentConfig {
     export function resolve(user: UserReactComponentConfig): ReactComponentConfig {
         if (user.component === undefined) {
@@ -290,10 +301,12 @@ export namespace UserReactComponentConfig {
 }
 
 // RowOrColumn
+/** @public */
 export interface UserRowOrColumnOrStackParentItemConfig extends UserItemConfig {
     content: (UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig)[];
 }
 
+/** @public */
 export namespace UserRowOrColumnOrStackParentItemConfig {
     export type ChildItemConfig = UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig;
 
@@ -336,10 +349,12 @@ export namespace UserRowOrColumnOrStackParentItemConfig {
     }
 }
 
+/** @public */
 export interface UserRowOrColumnItemConfig extends UserRowOrColumnOrStackParentItemConfig {
     type: 'row' | 'column';
 }
 
+/** @public */
 export namespace UserRowOrColumnItemConfig {
     export function resolve(user: UserRowOrColumnItemConfig): RowOrColumnItemConfig {
         const result: RowOrColumnItemConfig = {
@@ -358,6 +373,7 @@ export namespace UserRowOrColumnItemConfig {
     }
 }
 
+/** @public */
 export interface UserManagerConfig {
     content?: (UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig)[];
     openPopouts?: UserPopoutManagerConfig[];
@@ -370,6 +386,7 @@ export interface UserManagerConfig {
     maximisedItemId?: string | null,
 }
 
+/** @public */
 export namespace UserManagerConfig {
     export interface Settings {
         /**
@@ -457,7 +474,6 @@ export namespace UserManagerConfig {
         reorderOnTabMenuClick?: boolean;
 
         /**
-         * @default Settings.tabControlOffset
          * Default: 10
          */
         tabControlOffset?: number;
@@ -656,6 +672,7 @@ export namespace UserManagerConfig {
     }
 }
 
+/** @public */
 export interface UserPopoutManagerConfig extends UserManagerConfig {
     /** The id of the element the item will be appended to on popIn 
     * If null, append to topmost layout element 
@@ -665,14 +682,15 @@ export interface UserPopoutManagerConfig extends UserManagerConfig {
     * If null, position is last
     */
     indexInParent: number | null | undefined;
-    /** @deprecated use {@link window} */
+    /** @deprecated use {@link (UserPopoutManagerConfig:interface).window} */
     dimensions: UserPopoutManagerConfig.Dimensions | undefined; // for backwards compatibility
     window: UserPopoutManagerConfig.Window | undefined;
 }
 
+/** @public */
 export namespace UserPopoutManagerConfig {
     // Previous versions kept window information in Dimensions key.  Only use for backwards compatibility
-    /** @deprecated use {@link Window} */
+    /** @deprecated use {@link (UserPopoutManagerConfig:namespace).(Window:interface)} */
     export interface Dimensions extends UserManagerConfig.Dimensions {
         /** @deprecated use Window.width */
         width: number | null,
@@ -735,11 +753,13 @@ export namespace UserPopoutManagerConfig {
 /** Use to specify Config with defaults or deserialise a Config.
  * Deserialisation will handle backwards compatibility.
  * Note that Config should be used for serialisation (not UserConfig)
+ * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserConfig extends UserManagerConfig {
 }
 
+/** @public */
 export namespace UserConfig {
     export function resolve(user: UserConfig): Config {
         const config: Config = {

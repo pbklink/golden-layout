@@ -4,6 +4,7 @@ import { LayoutManager } from './layout-manager';
 import { ConfigMinifier } from './utils/config-minifier';
 import { createTemplateHtmlElement, getQueryStringParam, stripTags } from './utils/utils';
 
+/** @public */
 export class GoldenLayout extends LayoutManager {
     /** @internal */
     private _subWindowsCreated = false;
@@ -11,7 +12,7 @@ export class GoldenLayout extends LayoutManager {
     private _creationTimeoutPassed = false;
 
     /**
-    * @param container a Dom HTML element. Defaults to body
+    * @param container - A Dom HTML element. Defaults to body
     */
    constructor(userConfig: UserConfig, container?: HTMLElement) {        
         super(GoldenLayout.createConfig(userConfig), container);
@@ -132,8 +133,9 @@ export class GoldenLayout extends LayoutManager {
     }
 }
 
-/** @internal */
+/** @public */
 export namespace GoldenLayout {
+    /** @internal */
     export function createConfig(userConfig: UserConfig): LayoutManager.ManagerConfigAndIsSubWindow {
         const windowConfigKey = getQueryStringParam('gl-window');
         const isSubWindow = windowConfigKey !== null;  
@@ -172,5 +174,5 @@ export namespace GoldenLayout {
             managerConfig: config,
             isSubWindow,
         };
-     }
+    }
 }

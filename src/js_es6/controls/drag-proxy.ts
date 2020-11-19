@@ -29,6 +29,7 @@ const _template = '<div class="lm_dragProxy">' +
  * This class creates a temporary container
  * for the component whilst it is being dragged
  * and handles drag events
+ * @internal
  */
 export class DragProxy extends EventEmitter {
     private _area: ContentItem.Area | null;
@@ -47,8 +48,8 @@ export class DragProxy extends EventEmitter {
     get element(): HTMLElement { return this._element; }
 
     /** 
-     * @param x              The initial x position
-     * @param y              The initial y position
+     * @param x - The initial x position
+     * @param y - The initial y position
      * @internal
      */
     constructor(x: number, y: number,
@@ -136,9 +137,9 @@ export class DragProxy extends EventEmitter {
      * still within the valid drag area and calls the layoutManager to highlight the
      * current drop area
      *
-     * @param   offsetX The difference from the original x position in px
-     * @param   offsetY The difference from the original y position in px
-     * @param   event
+     * @param offsetX - The difference from the original x position in px
+     * @param offsetY - The difference from the original y position in px
+     * @param event -
      * @internal
      */
     private onDrag(offsetX: number, offsetY: number, event: EventEmitter.DragEvent) {
@@ -157,10 +158,9 @@ export class DragProxy extends EventEmitter {
     /**
      * Sets the target position, highlighting the appropriate area
      *
-     * @param   {Number} x The x position in px
-     * @param   {Number} y The y position in px
+     * @param x - The x position in px
+     * @param y - The y position in px
      *
-     * @returns {void}
      * @internal
      */
     private setDropPosition(x: number, y: number): void {

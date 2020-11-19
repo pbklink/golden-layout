@@ -52,8 +52,8 @@ export class DragSource {
     /**
      * Callback for the DragListener's dragStart event
      *
-     * @param   {int} x the x position of the mouse on dragStart
-     * @param   {int} y the x position of the mouse on dragStart
+     * @param x - The x position of the mouse on dragStart
+     * @param y - The x position of the mouse on dragStart
      */
     private onDragStart(x: number, y: number) {
         let itemConfig: ItemConfig;

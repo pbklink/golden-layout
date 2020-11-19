@@ -18,6 +18,7 @@ import {
 import { ContentItem } from './content-item'
 import { Stack } from './stack'
 
+/** @public */
 export class RowOrColumn extends ContentItem {
     /** @internal */
     private readonly _childElementContainer: HTMLElement;
@@ -72,16 +73,16 @@ export class RowOrColumn extends ContentItem {
     /**
      * Add a new contentItem to the Row or Column
      *
-     * @param {ContentItem} contentItem
-     * @param {[int]} index The position of the new item within the Row or Column.
-     *                      If no index is provided the item will be added to the end
-     * @param {[bool]} _$suspendResize If true the items won't be resized. This will leave the item in
-     *                                 an inconsistent state and is only intended to be used if multiple
-     *                                 children need to be added in one go and resize is called afterwards
+     * @param contentItem -
+     * @param index - The position of the new item within the Row or Column.
+     *                If no index is provided the item will be added to the end
+     * @param suspendResize - If true the items won't be resized. This will leave the item in
+     *                        an inconsistent state and is only intended to be used if multiple
+     *                        children need to be added in one go and resize is called afterwards
      *
-     * @returns {void}
+     * @returns
      */
-    addChild(contentItem: ContentItem, index: number | undefined, _$suspendResize: boolean): void {
+    addChild(contentItem: ContentItem, index: number | undefined, suspendResize: boolean): void {
 
         // contentItem = this.layoutManager._$normalizeContentItem(contentItem, this);
 
@@ -111,7 +112,7 @@ export class RowOrColumn extends ContentItem {
 
         const newItemSize = (1 / this.contentItems.length) * 100;
 
-        if (_$suspendResize === true) {
+        if (suspendResize === true) {
             this.emitBubblingEvent('stateChanged');
             return;
         }
@@ -182,8 +183,8 @@ export class RowOrColumn extends ContentItem {
     /**
      * Removes a child of this element
      *
-     * @param   contentItem
-     * @param   keepChild   If true the child will be removed, but not destroyed
+     * @param contentItem -
+     * @param keepChild - If true the child will be removed, but not destroyed
      *
      */
     removeChild(contentItem: ContentItem, keepChild: boolean): void {
@@ -259,9 +260,9 @@ export class RowOrColumn extends ContentItem {
     /**
      * Dock or undock a child if it posiible
      *
-     * @param   {ContentItem} contentItem
-     * @param   {Boolean} mode or toggle if undefined
-     * @param   {Boolean} collapsed after docking
+     * @param contentItem -
+     * @param mode - Toggle if undefined
+     * @param collapsed - After docking
      */
     dock(contentItem: Stack, mode?: boolean, collapsed?: boolean): void {
         if (this.contentItems.length === 1)
@@ -384,7 +385,7 @@ export class RowOrColumn extends ContentItem {
     }
 
     /**
-     * Turns the relative sizes calculated by _calculateRelativeSizes into
+     * Turns the relative sizes calculated by calculateRelativeSizes into
      * absolute pixel values and applies them to the children's DOM elements
      *
      * Assigns additional pixels to counteract Math.floor
@@ -469,11 +470,11 @@ export class RowOrColumn extends ContentItem {
      * - If the total == 100 (check for floating point errors)
      *        Excellent, job done
      *
-     * - If the total is > 100,
+     * - If the total is \> 100,
      *        set the size of items without set dimensions to 1/3 and add this to the total
      *        set the size off all items so that the total is hundred relative to their original size
      *
-     * - If the total is < 100
+     * - If the total is \< 100
      *        If there are items without set dimensions, distribute the remainder to 100 evenly between them
      *        If there are no items without set dimensions, increase all items sizes relative to
      *        their original size so that they add up to 100
@@ -620,9 +621,9 @@ export class RowOrColumn extends ContentItem {
      *
      * What it doesn't do though is append the splitter to the DOM
      *
-     * @param   {Int} index The position of the splitter
+     * @param index - The position of the splitter
      *
-     * @returns {Splitter}
+     * @returns
      * @internal
      */
     private createSplitter(index: number): Splitter {
@@ -677,7 +678,6 @@ export class RowOrColumn extends ContentItem {
 
     /**
      * Validate if row or column has ability to dock
-     * @private
      * @internal
      */
     private validateDocking(): void {
@@ -734,9 +734,9 @@ export class RowOrColumn extends ContentItem {
      * Invoked when a splitter's DragListener fires drag. Updates the splitters DOM position,
      * but not the sizes of the elements the splitter controls in order to minimize resize events
      *
-     * @param   splitter
-     * @param   offsetX  Relative pixel values to the splitters original position. Can be negative
-     * @param   offsetY  Relative pixel values to the splitters original position. Can be negative
+     * @param splitter -
+     * @param offsetX - Relative pixel values to the splitters original position. Can be negative
+     * @param offsetY - Relative pixel values to the splitters original position. Can be negative
      * @internal
      */
     private onSplitterDrag(splitter: Splitter, offsetX: number, offsetY: number) {
@@ -784,8 +784,9 @@ export class RowOrColumn extends ContentItem {
     }
 }
 
-/** @internal */
+/** @public */
 export namespace RowOrColumn {
+    /** @internal */
     export function getElementDimensionSize(element: HTMLElement, dimension: ItemConfig.HeightOrWidthPropertyName): number {
         if (dimension === 'width') {
             return getElementWidth(element);
@@ -794,6 +795,7 @@ export namespace RowOrColumn {
         }
     }
 
+    /** @internal */
     export function setElementDimensionSize(element: HTMLElement, dimension: ItemConfig.HeightOrWidthPropertyName, value: number): void {
         if (dimension === 'width') {
             return setElementWidth(element, value);
@@ -802,6 +804,7 @@ export namespace RowOrColumn {
         }
     }
 
+    /** @internal */
     export function createTemplateHtml(isColumn: boolean): string {
         return '<div class="lm_item lm_' + (isColumn ? 'column' : 'row') + '"></div>'
     }

@@ -1,9 +1,7 @@
-import { ComponentContainer, GoldenLayout } from "../dist/types/index.d";
-import { ItemConfig } from "../dist/types/js_es6/config/config";
 import {
-    UserConfig,
+    ComponentContainer, GoldenLayout, ItemConfig, UserConfig,
     UserSerialisableComponentConfig
-} from "../dist/types/js_es6/config/user-config";
+} from "../dist/golden-layout";
 import "../src/less/goldenlayout-base.less";
 import "../src/less/themes/goldenlayout-dark-theme.less";
 import "./test.less";
@@ -62,8 +60,9 @@ function run() {
         constructor(container: ComponentContainer, state: unknown) {
             const paraElement = document.createElement("p");
             paraElement.style.textAlign = "left";
+            paraElement.style.color = 'red';
             const title = container.config.title;
-            paraElement.innerHTML = (title ?? "unknown") + " component";
+            paraElement.innerText = (title ?? "unknown") + " component";
             container.contentElement.appendChild(paraElement);
         }
     }

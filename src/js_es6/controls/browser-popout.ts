@@ -17,6 +17,7 @@ import { deepExtend, getUniqueId } from '../utils/utils';
  *    - Opening the current window's URL with the configuration as a GET parameter
  *    - GoldenLayout when opened in the new window will look for the GET parameter
  *      and use it instead of the provided configuration
+ * @public
  */
 
 export class BrowserPopout extends EventEmitter {
@@ -28,8 +29,8 @@ export class BrowserPopout extends EventEmitter {
     private _checkReadyInterval: ReturnType<typeof setTimeout> | undefined;
 
     /**
-     * @param _config GoldenLayout item config
-     * @param _initialWindowSize A map with width, height, top and left
+     * @param _config - GoldenLayout item config
+     * @param _initialWindowSize - A map with width, height, top and left
      * @internal
      */
     constructor(private _config: PopoutManagerConfig,
@@ -239,7 +240,7 @@ export class BrowserPopout extends EventEmitter {
     /**
      * Serialises a map of key:values to a window options string
      *
-     * @param   windowOptions
+     * @param windowOptions -
      *
      * @returns serialised window options
      * @internal
