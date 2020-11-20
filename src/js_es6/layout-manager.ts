@@ -63,7 +63,7 @@ export abstract class LayoutManager extends EventEmitter {
     /** @internal */
     private _resizeTimeoutId: ReturnType<typeof setTimeout> | undefined;
     /** @internal */
-    private _componentConstructors: Record<string, ComponentItem.ComponentInstantiator> = {};
+    private _componentTypes: Record<string, ComponentItem.ComponentInstantiator> = {};
     /** @internal */
     private _itemAreas: ContentItem.Area[] = [];
     /** @internal */
@@ -88,7 +88,7 @@ export abstract class LayoutManager extends EventEmitter {
     private _selectedItem: ContentItem | null = null;
 
     /** @internal */
-    private _getComponentConstructorFtn: LayoutManager.GetComponentConstructorFtn;
+    private _getComponentConstructorFtn: LayoutManager.GetComponentConstructorCallback;
 
     /** @internal */
     private _windowResizeListener = () => this.onResize();
@@ -159,8 +159,8 @@ export abstract class LayoutManager extends EventEmitter {
      * Register a new component type with the layout manager.
      *
      * @deprecated See {@link https://stackoverflow.com/questions/40922531/how-to-check-if-a-javascript-function-is-a-constructor}
-     * instead use {@link (LayoutManager:class).registerComponentWithConstructor}
-     * or {@link (LayoutManager:class).registerComponentWithFactoryFunction}
+     * instead use {@link (LayoutManager:class).registerComponentConstructor}
+     * or {@link (LayoutManager:class).registerComponentFactoryFunction}
      */
     registerComponent(name: string,
         componentConstructorOrFactoryFtn: ComponentItem.ComponentConstructor | ComponentItem.ComponentFactoryFunction
@@ -170,10 +170,10 @@ export abstract class LayoutManager extends EventEmitter {
         } else {
             if (componentConstructorOrFactoryFtn.hasOwnProperty('prototype')) {
                 const componentConstructor = componentConstructorOrFactoryFtn as ComponentItem.ComponentConstructor;
-                this.registerComponentWithConstructor(name, componentConstructor);   
+                this.registerComponentConstructor(name, componentConstructor);   
             } else {
                 const componentFactoryFtn = componentConstructorOrFactoryFtn as ComponentItem.ComponentFactoryFunction;
-                this.registerComponentWithFactoryFunction(name, componentFactoryFtn);   
+                this.registerComponentFactoryFunction(name, componentFactoryFtn);   
             }
         }
     }
@@ -181,16 +181,16 @@ export abstract class LayoutManager extends EventEmitter {
     /**
      * Register a new component type with the layout manager.
      */
-    registerComponentWithConstructor(name: string, componentConstructor: ComponentItem.ComponentConstructor): void {
+    registerComponentConstructor(name: string, componentConstructor: ComponentItem.ComponentConstructor): void {
         if (typeof componentConstructor !== 'function') {
             throw new Error(i18nStrings[I18nStringId.PleaseRegisterAConstructorFunction]);
         }
 
-        if (this._componentConstructors[name] !== undefined) {
+        if (this._componentTypes[name] !== undefined) {
             throw new Error(`${i18nStrings[I18nStringId.ComponentIsAlreadyRegistered]}: ${name}`);
         }
 
-        this._componentConstructors[name] = {
+        this._componentTypes[name] = {
             constructor: componentConstructor,
             factoryFunction: undefined,
         }
@@ -199,16 +199,16 @@ export abstract class LayoutManager extends EventEmitter {
     /**
      * Register a new component with the layout manager.
      */
-    registerComponentWithFactoryFunction(name: string, componentFactoryFunction: ComponentItem.ComponentFactoryFunction): void {
+    registerComponentFactoryFunction(name: string, componentFactoryFunction: ComponentItem.ComponentFactoryFunction): void {
         if (typeof componentFactoryFunction !== 'function') {
             throw new Error('Please register a constructor function');
         }
 
-        if (this._componentConstructors[name] !== undefined) {
+        if (this._componentTypes[name] !== undefined) {
             throw new Error('Component ' + name + ' is already registered');
         }
 
-        this._componentConstructors[name] = {
+        this._componentTypes[name] = {
             constructor: undefined,
             factoryFunction: componentFactoryFunction,
         }
@@ -216,12 +216,19 @@ export abstract class LayoutManager extends EventEmitter {
 
     /**
      * Register a component function with the layout manager. This function should
-     * return a constructor for a component based on a config.  If undefined is returned, 
-     * and no component has been registered under that name using registerComponent, an 
-     * error will be thrown.
+     * return a constructor for a component based on a config.
+     * @deprecated use {@link (LayoutManager:class).registerGetComponentConstructorCallback}
      */
-    registerComponentFunction(callbackClosure: LayoutManager.GetComponentConstructorFtn): void {
-        if (typeof callbackClosure !== 'function') {
+    registerComponentFunction(callback: LayoutManager.GetComponentConstructorCallback): void {
+        this.registerGetComponentConstructorCallback(callback);
+    }
+
+    /**
+     * Register a callback closure with the layout manager which supplies a Component Constructor.
+     * This callback should return a constructor for a component based on a config.
+     */
+    registerGetComponentConstructorCallback(callback: LayoutManager.GetComponentConstructorCallback): void {
+        if (typeof callback !== 'function') {
             throw new Error('Please register a callback function');
         }
 
@@ -229,7 +236,11 @@ export abstract class LayoutManager extends EventEmitter {
             console.warn('Multiple component functions are being registered.  Only the final registered function will be used.')
         }
 
-        this._getComponentConstructorFtn = callbackClosure;
+        this._getComponentConstructorFtn = callback;
+    }
+
+    getRegisteredComponentTypeNames(): string[] {
+        return Object.keys(this._componentTypes);
     }
 
     /**
@@ -294,7 +305,7 @@ export abstract class LayoutManager extends EventEmitter {
      */
     getComponentInstantiator(config: ComponentItemConfig): ComponentItem.ComponentInstantiator {
         const name = this.getComponentNameFromConfig(config)
-        let constructorToUse = this._componentConstructors[name]
+        let constructorToUse = this._componentTypes[name]
         if (constructorToUse === undefined) {
             if (this._getComponentConstructorFtn !== undefined) {
                 constructorToUse = {
@@ -311,7 +322,7 @@ export abstract class LayoutManager extends EventEmitter {
     }
 
     /**
-     * Called from GolderLayout class. Finishes of init
+     * Called from GoldenLayout class. Finishes of init
      * @internal
      */
     init(): void {
@@ -407,7 +418,7 @@ export abstract class LayoutManager extends EventEmitter {
         }
     }
 
-    /** @internal */
+    /** @public */
     createAndInitContentItem(config: ItemConfig, parent: ContentItem): ContentItem {
         const newItem = this.createContentItem(config, parent);
         newItem.init();
@@ -1155,7 +1166,7 @@ export abstract class LayoutManager extends EventEmitter {
 
 /** @public */
 export namespace LayoutManager {
-    export type GetComponentConstructorFtn = (this: void, config: ComponentItemConfig) => ComponentItem.ComponentConstructor
+    export type GetComponentConstructorCallback = (this: void, config: ComponentItemConfig) => ComponentItem.ComponentConstructor
 
     /** @internal */
     export interface ManagerConfigAndIsSubWindow {

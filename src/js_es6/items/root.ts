@@ -1,4 +1,5 @@
 import { HeaderedItemConfig, ItemConfig, RootItemConfig, RowOrColumnOrStackParentItemConfig, StackItemConfig } from '../config/config';
+import { UserComponentItemConfig, UserItemConfig, UserRowOrColumnItemConfig, UserStackItemConfig } from '../config/user-config';
 import { AssertError, UnexpectedNullError } from '../errors/internal-error';
 import { LayoutManager } from '../layout-manager';
 import { AreaLinkedRect } from '../utils/types';
@@ -40,17 +41,33 @@ export class Root extends ContentItem {
         this.initContentItems();
     }
 
-    addChild(contentItem: ContentItem, index?: number): void {
+    addChildFromItemConfig(userItemConfig: UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig, 
+        index?: number
+    ): void {
+        const itemConfig = UserItemConfig.resolve(userItemConfig);
+        let parent: ContentItem;
+        if (this.contentItems.length > 0) {
+            parent = this.contentItems[0];          
+        } else {
+            parent = this;
+        }
+        const contentItem = this.layoutManager.createAndInitContentItem(itemConfig, parent);
+        parent.addChild(contentItem, index);
+    }
+
+    addChild(contentItem: ContentItem, index?: number): number {
         if (this.contentItems.length > 0) {
             throw new Error('Root node can only have a single child');
         }
 
         // contentItem = this.layoutManager._$normalizeContentItem(contentItem, this);
         this._childElementContainer.appendChild(contentItem.element);
-        super.addChild(contentItem, index);
+        index = super.addChild(contentItem, index);
 
         this.updateSize();
         this.emitBubblingEvent('stateChanged');
+
+        return index;
     }
 
     /** @internal */

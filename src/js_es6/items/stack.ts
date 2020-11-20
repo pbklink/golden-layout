@@ -1,4 +1,5 @@
 import { HeaderedItemConfig, ItemConfig, StackItemConfig } from '../config/config';
+import { UserComponentItemConfig, UserItemConfig } from '../config/user-config';
 import { DragProxy } from '../controls/drag-proxy';
 import { Header } from '../controls/header';
 import { AssertError, UnexpectedNullError } from '../errors/internal-error';
@@ -263,8 +264,14 @@ export class Stack extends ContentItem {
         this._header.setRowColumnClosable(value);
     }
 
-    addChild(contentItem: ContentItem, index: number): void {
-        if(index > this.contentItems.length){
+    addChildFromItemConfig(userItemConfig: UserComponentItemConfig, index?: number): void {
+        const itemConfig = UserItemConfig.resolve(userItemConfig);
+        const contentItem = this.layoutManager.createAndInitContentItem(itemConfig, this);
+        this.addChild(contentItem, index);
+    }
+
+    addChild(contentItem: ContentItem, index?: number): number {
+        if(index !== undefined && index > this.contentItems.length){
             /* 
              * UGLY PATCH: PR #428, commit a4e84ec5 fixed a bug appearing on touchscreens during the drag of a panel. 
              * The bug was caused by the physical removal of the element on drag: partial documentation is at issue #425. 
@@ -282,7 +289,7 @@ export class Stack extends ContentItem {
         if (!(contentItem instanceof ComponentItem)) {
             throw new AssertError('SACC88532'); // Stacks can only have Component children
         } else {
-            super.addChild(contentItem, index);
+            index = super.addChild(contentItem, index);
             this._childElementContainer.appendChild(contentItem.element);
             this._header.createTab(contentItem, index);
             this.setActiveComponentItem(contentItem);
@@ -292,6 +299,8 @@ export class Stack extends ContentItem {
                 this._stackParent.validateDocking();
             }
             this.emitBubblingEvent('stateChanged');
+
+            return index;
         }
     }
 

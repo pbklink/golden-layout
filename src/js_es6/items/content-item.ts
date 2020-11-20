@@ -150,7 +150,7 @@ export abstract class ContentItem extends EventEmitter {
      * @param suspendResize - Used by descendent implementations
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    addChild(contentItem: ContentItem, index?: number | null, suspendResize?: boolean): void {
+    addChild(contentItem: ContentItem, index?: number | null, suspendResize?: boolean): number {
         index ??= this._contentItems.length;
 
         this._contentItems.splice(index, 0, contentItem);
@@ -171,6 +171,8 @@ export abstract class ContentItem extends EventEmitter {
         if (this._isInitialised === true && contentItem._isInitialised === false) {
             contentItem.init();
         }
+
+        return index;
     }
 
     /**

@@ -3,7 +3,9 @@ const webpack = require("webpack");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const WriteFileWebpackPlugin = require('../node_modules/write-file-webpack-plugin');
 
 module.exports = {
     entry: [
@@ -60,8 +62,16 @@ module.exports = {
         new webpack.DefinePlugin({
             env: JSON.stringify(process.env)
         }),
-        new HtmlWebpackPlugin({
-            filename: "api-test/index.html"
+        new CopyWebpackPlugin(
+            {
+                patterns: [
+                    { context: './api-test/', from: 'index.html', to: '.', force: true },
+                    { context: './api-test/', from: 'styles.css', to: '.', force: true },
+                ]
+            },
+            { copyUnmodified: true, }
+        ),
+        new WriteFileWebpackPlugin({
         })
     ]
 };

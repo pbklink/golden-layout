@@ -9,4 +9,5 @@ debug.log
 /debug.log
 /lib
 /api-test/dist
+/api-test/out-tsc
 /temp

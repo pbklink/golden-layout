@@ -1,4 +1,5 @@
 import { ItemConfig, RowOrColumnItemConfig } from '../config/config'
+import { UserComponentItemConfig, UserItemConfig, UserRowOrColumnItemConfig, UserStackItemConfig } from '../config/user-config'
 import { Splitter } from '../controls/splitter'
 import { AssertError, UnexpectedNullError } from '../errors/internal-error'
 import { LayoutManager } from '../layout-manager'
@@ -70,6 +71,14 @@ export class RowOrColumn extends ContentItem {
     }
 
 
+    addChildFromItemConfig(userItemConfig: UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig,
+        index?: number
+    ): void {
+        const itemConfig = UserItemConfig.resolve(userItemConfig);
+        const contentItem = this.layoutManager.createAndInitContentItem(itemConfig, this);
+        this.addChild(contentItem, index, false);
+    }
+
     /**
      * Add a new contentItem to the Row or Column
      *
@@ -82,7 +91,7 @@ export class RowOrColumn extends ContentItem {
      *
      * @returns
      */
-    addChild(contentItem: ContentItem, index: number | undefined, suspendResize: boolean): void {
+    addChild(contentItem: ContentItem, index?: number, suspendResize?: boolean): number {
 
         // contentItem = this.layoutManager._$normalizeContentItem(contentItem, this);
 
@@ -114,7 +123,7 @@ export class RowOrColumn extends ContentItem {
 
         if (suspendResize === true) {
             this.emitBubblingEvent('stateChanged');
-            return;
+            return index;
         }
 
         for (let i = 0; i < this.contentItems.length; i++) {
@@ -129,6 +138,8 @@ export class RowOrColumn extends ContentItem {
         this.updateSize();
         this.emitBubblingEvent('stateChanged');
         this.validateDocking();
+
+        return index;
     }
 
 
