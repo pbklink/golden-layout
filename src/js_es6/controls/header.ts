@@ -159,7 +159,7 @@ export class Header extends EventEmitter {
 
         this._element = createTemplateHtmlElement(_template);
 
-        if (this._layoutManager.managerConfig.settings.selectionEnabled === true) {
+        if (this._layoutManager.layoutConfig.settings.selectionEnabled === true) {
             this._element.classList.add('lm_selectable');
             this._element.addEventListener('click', this._headerClickListener);
             this._element.addEventListener('touchstart', this._headerTouchStartListener);
@@ -183,7 +183,7 @@ export class Header extends EventEmitter {
                     this._controlsContainerElement = controlsContainerElement as HTMLElement;
                     globalThis.document.addEventListener('mouseup', this._documentMouseUpListener);
 
-                    this._tabControlOffset = this._layoutManager.managerConfig.settings.tabControlOffset;
+                    this._tabControlOffset = this._layoutManager.layoutConfig.settings.tabControlOffset;
                     this.createControls(closeEvent);
                 }
             }
@@ -302,7 +302,7 @@ export class Header extends EventEmitter {
             if (activeIndex < 0) {
                 throw new AssertError('HSACI56632');
             } else {
-                if (this._layoutManager.managerConfig.settings.reorderOnTabMenuClick) {
+                if (this._layoutManager.layoutConfig.settings.reorderOnTabMenuClick) {
                     /**
                      * If the tab selected was in the dropdown, move everything down one to make way for this one to be the first.
                      * This will make sure the most used tabs stay visible.
@@ -421,7 +421,7 @@ export class Header extends EventEmitter {
         }
         setElementDisplayVisibility(this._tabDropdownButton.element, showTabMenu === true);
 
-        const headerHeight = this._show ? this._layoutManager.managerConfig.dimensions.headerHeight : 0;
+        const headerHeight = this._show ? this._layoutManager.layoutConfig.dimensions.headerHeight : 0;
 
         if (this._leftRightSided) {
             this._element.style.height = '';
@@ -433,7 +433,7 @@ export class Header extends EventEmitter {
         let availableWidth = this._element.offsetWidth - this._controlsContainerElement.offsetWidth - this._tabControlOffset;
         let cumulativeTabWidth = 0;
         let tabOverlapAllowanceExceeded = false;
-        const tabOverlapAllowance = this._layoutManager.managerConfig.settings.tabOverlapAllowance;
+        const tabOverlapAllowance = this._layoutManager.layoutConfig.settings.tabOverlapAllowance;
         const activeIndex = (this._activeComponentItem ? this._tabs.indexOf(this._activeComponentItem.tab as Tab) : 0);
         const activeTab = this._tabs[activeIndex];
         if (this._leftRightSided) {
@@ -619,7 +619,7 @@ export class Header extends EventEmitter {
 
     /** @internal */
     private handleButtonPopoutEvent() {
-        if (this._layoutManager.managerConfig.settings.popoutWholeStack) {
+        if (this._layoutManager.layoutConfig.settings.popoutWholeStack) {
             if (this._popoutEvent === undefined) {
                 throw new UnexpectedUndefinedError('HHBPOE17834');
             } else {

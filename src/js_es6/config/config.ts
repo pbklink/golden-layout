@@ -11,22 +11,19 @@ export interface ItemConfig {
     readonly minWidth: number;
     height: number;
     readonly minHeight: number;
-    // Currently id has 2 purposes. It can be used by user to identify Items and it is also used to track which Item is maximised
-    // This is confusing
-    // It should be refactored to only exist for User purposes
-    // A new property "maximised: true | undefined" should be added to track which Item is maximised
+    // id no longer specifies whether an Item is maximised.  This is now done by HeaderItemConfig.maximised
     id: string | string[];
     readonly isClosable: boolean;
     title: string;
-    readonly reorderEnabled: boolean; // Takes precedence over ManagerConfig.reorderEnabled. Should be settings.reorderEnabled
+    readonly reorderEnabled: boolean; // Takes precedence over LayoutConfig.reorderEnabled. Should be settings.reorderEnabled
 }
 
 /** @public */
 export namespace ItemConfig {
-    export type Type = 'root' | 'row' | 'column' | 'stack' | 'component' | 'react-component';
+    export type Type = 'ground' | 'row' | 'column' | 'stack' | 'component' | 'react-component';
 
     export namespace Type {
-        export const root = 'root';
+        export const ground = 'ground';
         export const row = 'row';
         export const column = 'column';
         export const stack = 'stack';
@@ -38,7 +35,7 @@ export namespace ItemConfig {
 
     /** @internal */
     export const defaults: ItemConfig = {
-        type: ItemConfig.Type.root, // not really default but need something
+        type: ItemConfig.Type.ground, // not really default but need something
         content: [],
         width: 50,
         minWidth: 0,
@@ -53,11 +50,11 @@ export namespace ItemConfig {
     /** Creates a copy of the original ItemConfig using an alternative content if specified */
     export function createCopy(original: ItemConfig, content?: ItemConfig[]): ItemConfig {
         switch (original.type) {
-            case ItemConfig.Type.root:
+            case ItemConfig.Type.ground:
             case ItemConfig.Type.row:
             case ItemConfig.Type.column:
-                return RowOrColumnOrStackParentItemConfig.createCopy(original as RowOrColumnOrStackParentItemConfig,
-                    content as RowOrColumnOrStackParentItemConfig.ChildItemConfig[]);
+                return RowOrColumnItemConfig.createCopy(original as RowOrColumnItemConfig,
+                    content as RowOrColumnItemConfig.ChildItemConfig[]);
 
             case ItemConfig.Type.stack:
                 return StackItemConfig.createCopy(original as StackItemConfig, content as ComponentItemConfig[]);
@@ -75,11 +72,11 @@ export namespace ItemConfig {
 
     export function createDefault(type: Type): ItemConfig {
         switch (type) {
-            case ItemConfig.Type.root:
-                throw new AssertError('CICCDR91562'); // Get default root from ManagerConfig
+            case ItemConfig.Type.ground:
+                throw new AssertError('CICCDR91562'); // Get default root from LayoutConfig
             case ItemConfig.Type.row:
             case ItemConfig.Type.column:
-                return RowOrColumnOrStackParentItemConfig.createDefault(type);
+                return RowOrColumnItemConfig.createDefault(type);
 
             case ItemConfig.Type.stack:
                 return StackItemConfig.createDefault();
@@ -103,25 +100,32 @@ export namespace ItemConfig {
         }
     }
 
-    export function isRoot(itemConfig: ItemConfig): itemConfig is RootItemConfig {
-        return itemConfig.type === ItemConfig.Type.root;
-    }
-
     export function isComponentItem(itemConfig: ItemConfig): itemConfig is ComponentItemConfig {
         return itemConfig.type === ItemConfig.Type.component || itemConfig.type === ItemConfig.Type.reactComponent;
+    }
+
+    export function isStackItem(itemConfig: ItemConfig): itemConfig is StackItemConfig {
+        return itemConfig.type === ItemConfig.Type.stack;
+    }
+
+    export function isGroundItem(itemConfig: ItemConfig): itemConfig is GroundItemConfig {
+        return itemConfig.type === ItemConfig.Type.ground;
     }
 }
 
 // Stack or Component
 /** @public */
 export interface HeaderedItemConfig extends ItemConfig {
-    header: HeaderedItemConfig.Header | undefined; // undefined means get header settings from ManagerConfig
+    header: HeaderedItemConfig.Header | undefined; // undefined means get header settings from LayoutConfig
+    maximised: boolean;
 }
 
 /** @public */
 export namespace HeaderedItemConfig {
+    export const defaultMaximised = false;
+
     export interface Header {
-        // undefined means get property value from ManagerConfig
+        // undefined means get property value from LayoutConfig
         readonly show: false | Side | undefined;
         readonly popout: false | string | undefined;
         readonly dock: false | string | undefined;
@@ -170,6 +174,7 @@ export namespace StackItemConfig {
             height: original.height,
             minHeight: original.minHeight,
             id: original.id,
+            maximised: original.maximised,
             isClosable: original.isClosable,
             reorderEnabled: original.reorderEnabled,
             title: original.title,
@@ -197,6 +202,7 @@ export namespace StackItemConfig {
             height: ItemConfig.defaults.height,
             minHeight: ItemConfig.defaults.minHeight,
             id: ItemConfig.defaults.id,
+            maximised: HeaderedItemConfig.defaultMaximised,
             isClosable: ItemConfig.defaults.isClosable,
             reorderEnabled: ItemConfig.defaults.reorderEnabled,
             title: ItemConfig.defaults.title,
@@ -230,7 +236,7 @@ export namespace ComponentItemConfig {
 export interface SerialisableComponentConfig extends ComponentItemConfig {
     // see UserJsonComponentConfig for comments
     readonly type: 'component';
-    componentState: JsonValue;
+    componentState?: JsonValue;
 }
 
 /** @public */
@@ -244,6 +250,7 @@ export namespace SerialisableComponentConfig {
             height: original.height,
             minHeight: original.minHeight,
             id: original.id,
+            maximised: original.maximised,
             isClosable: original.isClosable,
             reorderEnabled: original.reorderEnabled,
             title: original.title,
@@ -263,6 +270,7 @@ export namespace SerialisableComponentConfig {
             height: ItemConfig.defaults.height,
             minHeight: ItemConfig.defaults.minHeight,
             id: ItemConfig.defaults.id,
+            maximised: HeaderedItemConfig.defaultMaximised,
             isClosable: ItemConfig.defaults.isClosable,
             reorderEnabled: ItemConfig.defaults.reorderEnabled,
             title: ItemConfig.defaults.title,
@@ -295,6 +303,7 @@ export namespace ReactComponentConfig {
             height: original.height,
             minHeight: original.minHeight,
             id: original.id,
+            maximised: original.maximised,
             isClosable: original.isClosable,
             reorderEnabled: original.reorderEnabled,
             title: original.title,
@@ -315,6 +324,7 @@ export namespace ReactComponentConfig {
             height: ItemConfig.defaults.height,
             minHeight: ItemConfig.defaults.minHeight,
             id: ItemConfig.defaults.id,
+            maximised: HeaderedItemConfig.defaultMaximised,
             isClosable: ItemConfig.defaults.isClosable,
             reorderEnabled: ItemConfig.defaults.reorderEnabled,
             title: ItemConfig.defaults.title,
@@ -330,15 +340,16 @@ export namespace ReactComponentConfig {
 /** Base for Root or RowOrColumn ItemConfigs
  * @public
  */
-export interface RowOrColumnOrStackParentItemConfig extends ItemConfig {
-    /** Note that Root and RowOrColumn ItemConfig contents, can contain ComponentItem itemConfigs.  However
+export interface RowOrColumnItemConfig extends ItemConfig {
+    readonly type: 'row' | 'column';
+    /** Note that RowOrColumn ItemConfig contents, can contain ComponentItem itemConfigs.  However
      * when ContentItems are created, these ComponentItem itemConfigs will create a Stack with a child ComponentItem.
      */
     readonly content: readonly (RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig)[];
 }
 
 /** @public */
-export namespace RowOrColumnOrStackParentItemConfig {
+export namespace RowOrColumnItemConfig {
     export type ChildItemConfig = RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig;
 
     export function isChildItemConfig(itemConfig: ItemConfig): itemConfig is ChildItemConfig {
@@ -349,15 +360,15 @@ export namespace RowOrColumnOrStackParentItemConfig {
             case ItemConfig.Type.reactComponent:
             case ItemConfig.Type.component:
                 return true;
-            case ItemConfig.Type.root:
+            case ItemConfig.Type.ground:
                 return false;
             default:
                 throw new UnreachableCaseError('CROCOSPCICIC13687', itemConfig.type);
         }
     }
 
-    export function createCopy(original: RowOrColumnOrStackParentItemConfig, content?: ChildItemConfig[]): RowOrColumnOrStackParentItemConfig {
-        const result: RowOrColumnOrStackParentItemConfig = {
+    export function createCopy(original: RowOrColumnItemConfig, content?: ChildItemConfig[]): RowOrColumnItemConfig {
+        const result: RowOrColumnItemConfig = {
             type: original.type,
             content: content !== undefined ? copyContent(content) : copyContent(original.content),
             width: original.width,
@@ -381,8 +392,8 @@ export namespace RowOrColumnOrStackParentItemConfig {
         return result;
     }
 
-    export function createDefault(type: ItemConfig.Type): RowOrColumnOrStackParentItemConfig {
-        const result: RowOrColumnOrStackParentItemConfig = {
+    export function createDefault(type: 'row' | 'column'): RowOrColumnItemConfig {
+        const result: RowOrColumnItemConfig = {
             type,
             content: [],
             width: ItemConfig.defaults.width,
@@ -398,32 +409,80 @@ export namespace RowOrColumnOrStackParentItemConfig {
     }
 }
 
+/** 
+ * RootItemConfig is the topmost ItemConfig specified by the user.
+ * Note that it does not have a corresponding contentItem.  It specifies the one and only child of the Ground ContentItem
+ * Note that RootItemConfig can be an ComponentItem itemConfig.  However when the Ground ContentItem's child is created
+ * a ComponentItem itemConfig will create a Stack with a child ComponentItem.
+ * @public
+*/
+export type RootItemConfig = RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig;
+
 /** @public */
-export interface RowOrColumnItemConfig extends RowOrColumnOrStackParentItemConfig {
-    readonly type: 'row' | 'column';
+export namespace RootItemConfig {
+    export function createCopy(config: RootItemConfig): RootItemConfig {
+        return ItemConfig.createCopy(config) as RootItemConfig;
+    }
+
+    export function isRootItemConfig(itemConfig: ItemConfig): itemConfig is RootItemConfig {
+        switch (itemConfig.type) {
+            case ItemConfig.Type.row:
+            case ItemConfig.Type.column:
+            case ItemConfig.Type.stack:
+            case ItemConfig.Type.reactComponent:
+            case ItemConfig.Type.component:
+                return true;
+            case ItemConfig.Type.ground:
+                return false;
+            default:
+                throw new UnreachableCaseError('CROCOSPCICIC13687', itemConfig.type);
+        }
+    }
+}
+
+/** @internal */
+export interface GroundItemConfig extends ItemConfig {
+    readonly type: 'ground';
+    width: 100,
+    minWidth: 0,
+    height: 100,
+    minHeight: 0,
+    id: '',
+    isClosable: false,
+    title: '',
+    reorderEnabled: false,
+}
+
+/** @internal */
+export namespace GroundItemConfig {
+    export function create(content: RootItemConfig):GroundItemConfig {
+        return {
+            type: ItemConfig.Type.ground,
+            content: [content],
+            width: 100,
+            minWidth: 0,
+            height: 100,
+            minHeight: 0,
+            id: '',
+            isClosable: false,
+            title: '',
+            reorderEnabled: false,
+        }
+    }
 }
 
 /** @public */
-export interface RootItemConfig extends RowOrColumnOrStackParentItemConfig {
-    readonly type: 'root';
+export interface LayoutConfig {
+    readonly root: RootItemConfig;
+    readonly openPopouts: PopoutLayoutConfig[];
+    readonly dimensions: LayoutConfig.Dimensions;
+    readonly settings: LayoutConfig.Settings;
+    readonly header: LayoutConfig.Header;
+    readonly resolved: true,
 }
 
 /** @public */
-export interface ManagerConfig {
-    readonly content: readonly (RowOrColumnItemConfig | StackItemConfig | ComponentItemConfig)[];
-    readonly openPopouts: PopoutManagerConfig[];
-    readonly dimensions: ManagerConfig.Dimensions;
-    readonly settings: ManagerConfig.Settings;
-    readonly header: ManagerConfig.Header;
-    // maximisedItemId should be removed in future
-    // Instead LayoutManager should scan Config Items for first Item with property maximised = true
-    // when it first loads config
-    // See comments on property "id" in ItemConfig
-    readonly maximisedItemId: string | null;
-}
-
-/** @public */
-export namespace ManagerConfig {
+export namespace LayoutConfig {
     export interface Settings {
         // see UserConfig.Settings for comments
         readonly constrainDragToContainer: boolean;
@@ -450,7 +509,7 @@ export namespace ManagerConfig {
         }
 
         /** @internal */
-        export const defaults: ManagerConfig.Settings = {
+        export const defaults: LayoutConfig.Settings = {
             constrainDragToContainer: true,
             reorderEnabled: true,
             selectionEnabled: false,
@@ -460,7 +519,7 @@ export namespace ManagerConfig {
             showPopoutIcon: true,
             showMaximiseIcon: true,
             showCloseIcon: true,
-            responsiveMode: ManagerConfig.Settings.ResponsiveMode.onload,
+            responsiveMode: LayoutConfig.Settings.ResponsiveMode.onload,
             tabOverlapAllowance: 0,
             reorderOnTabMenuClick: true,
             tabControlOffset: 10
@@ -510,7 +569,7 @@ export namespace ManagerConfig {
         }
 
         /** @internal */
-        export const defaults: ManagerConfig.Dimensions = {
+        export const defaults: LayoutConfig.Dimensions = {
             borderWidth: 5,
             borderGrabWidth: 15,
             minItemHeight: 10,
@@ -545,7 +604,7 @@ export namespace ManagerConfig {
         }
 
         /** @internal */
-        export const defaults: ManagerConfig.Header = {
+        export const defaults: LayoutConfig.Header = {
             show: Side.top,
             popout: 'open in new window',
             dock: 'dock',
@@ -556,54 +615,45 @@ export namespace ManagerConfig {
         } as const;
     }
 
-    export function isPopout(config: ManagerConfig): config is PopoutManagerConfig {
+    export function isPopout(config: LayoutConfig): config is PopoutLayoutConfig {
         return 'parentId' in config;
     }
 
-    export function createCopy(config: ManagerConfig): ManagerConfig {
+    export function createCopy(config: LayoutConfig): LayoutConfig {
         if (isPopout(config)) {
-            return PopoutManagerConfig.createCopy(config);
+            return PopoutLayoutConfig.createCopy(config);
         } else {
-            return Config.createCopy(config as Config);
+            const result: LayoutConfig = {
+                root: RootItemConfig.createCopy(config.root),
+                openPopouts: LayoutConfig.copyOpenPopouts(config.openPopouts),
+                settings: LayoutConfig.Settings.createCopy(config.settings),
+                dimensions: LayoutConfig.Dimensions.createCopy(config.dimensions),
+                header: LayoutConfig.Header.createCopy(config.header),
+                resolved: config.resolved,
+            }
+            return result;
         }
     }
 
-    export function createRootItemConfig(managerConfig: ManagerConfig, 
-        content?: RowOrColumnOrStackParentItemConfig.ChildItemConfig[]
-    ): RootItemConfig {
-        return {
-            type: ItemConfig.Type.root,
-            content: content ?? managerConfig.content,
-            width: 100,
-            minWidth: 0,
-            height: 100,
-            minHeight: 0,
-            id: '',
-            isClosable: false,
-            title: '',
-            reorderEnabled: false,
-        }
-    }
-
-    export function copyOpenPopouts(original: PopoutManagerConfig[]): PopoutManagerConfig[] {
+    export function copyOpenPopouts(original: PopoutLayoutConfig[]): PopoutLayoutConfig[] {
         const count = original.length;
-        const result = new Array<PopoutManagerConfig>(count);
+        const result = new Array<PopoutLayoutConfig>(count);
         for (let i = 0; i < count; i++) {
-            result[i] = PopoutManagerConfig.createCopy(original[i]);
+            result[i] = PopoutLayoutConfig.createCopy(original[i]);
         }
         return result;
     }
 }
 
 /** @public */
-export interface PopoutManagerConfig extends ManagerConfig {
+export interface PopoutLayoutConfig extends LayoutConfig {
     readonly parentId: string | null;
     readonly indexInParent: number | null;
-    readonly window: PopoutManagerConfig.Window;
+    readonly window: PopoutLayoutConfig.Window;
 }
 
 /** @public */
-export namespace PopoutManagerConfig {
+export namespace PopoutLayoutConfig {
     export interface Window {
         readonly width: number | null,
         readonly height: number | null,
@@ -622,7 +672,7 @@ export namespace PopoutManagerConfig {
         }
 
         /** @internal */
-        export const defaults: PopoutManagerConfig.Window = {
+        export const defaults: PopoutLayoutConfig.Window = {
             width: null,
             height: null,
             left: null,
@@ -630,40 +680,21 @@ export namespace PopoutManagerConfig {
         } as const;
     }
 
-    export function createCopy(original: PopoutManagerConfig): PopoutManagerConfig {
-        const result: PopoutManagerConfig = {
-            content: RowOrColumnOrStackParentItemConfig.copyContent(original.content),
-            openPopouts: ManagerConfig.copyOpenPopouts(original.openPopouts),
-            settings: ManagerConfig.Settings.createCopy(original.settings),
-            dimensions: ManagerConfig.Dimensions.createCopy(original.dimensions),
-            header: ManagerConfig.Header.createCopy(original.header),
-            maximisedItemId: original.maximisedItemId,
+    export function createCopy(original: PopoutLayoutConfig): PopoutLayoutConfig {
+        const result: PopoutLayoutConfig = {
+            root: RootItemConfig.createCopy(original.root),
+            openPopouts: LayoutConfig.copyOpenPopouts(original.openPopouts),
+            settings: LayoutConfig.Settings.createCopy(original.settings),
+            dimensions: LayoutConfig.Dimensions.createCopy(original.dimensions),
+            header: LayoutConfig.Header.createCopy(original.header),
             parentId: original.parentId,
             indexInParent: original.indexInParent,
-            window: PopoutManagerConfig.Window.createCopy(original.window),
-        }
-        return result;
-    }
-}
-
-/** @public */
-export interface Config extends ManagerConfig {
-    readonly resolved: true,
-}
-
-/** @public */
-export namespace Config {
-
-    export function createCopy(original: Config): Config {
-        const result: Config = {
+            window: PopoutLayoutConfig.Window.createCopy(original.window),
             resolved: original.resolved,
-            content: RowOrColumnOrStackParentItemConfig.copyContent(original.content),
-            openPopouts: ManagerConfig.copyOpenPopouts(original.openPopouts),
-            settings: ManagerConfig.Settings.createCopy(original.settings),
-            dimensions: ManagerConfig.Dimensions.createCopy(original.dimensions),
-            header: ManagerConfig.Header.createCopy(original.header),
-            maximisedItemId: original.maximisedItemId,
         }
         return result;
     }
 }
+
+/** @public @deprecated - use {@link (LayoutConfig:interface)} */
+export type Config = LayoutConfig;

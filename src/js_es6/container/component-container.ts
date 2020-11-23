@@ -23,6 +23,9 @@ export class ComponentContainer extends EventEmitter {
     /** @internal */
     private _tab: Tab;
 
+    stateRequestEvent: ComponentContainer.StateRequestEventHandler | undefined;
+    beforeDestroyEvent: ComponentContainer.BeforeDestroyEventHandler | undefined;
+
     get width(): number | null { return this._width; }
     get height(): number | null { return this._height; }
     get parent(): ComponentItem { return this._parent; }
@@ -55,7 +58,16 @@ export class ComponentContainer extends EventEmitter {
         }
     }
 
-    /** @deprecated use {@link ComponentContainer.contentElement } */
+    destroy(): void {
+        if (this.beforeDestroyEvent !== undefined) {
+            this.beforeDestroyEvent();
+        }
+        this.stateRequestEvent = undefined;
+        this.beforeDestroyEvent = undefined;
+        this.emit('destroy');
+    }
+
+    /** @deprecated use {@link (ComponentContainer:class).contentElement } */
     getElement(): HTMLElement {
         return this._contentElement;
     }
@@ -155,12 +167,11 @@ export class ComponentContainer extends EventEmitter {
         }
     }
 
-
     /**
      * Returns the current state object
      * @returns state
      */
-    getState(): JsonValue {
+    getState(): JsonValue | undefined {
         if (ComponentItemConfig.isSerialisable(this._config)) {
             return this._config.componentState;
         } else {
@@ -172,7 +183,6 @@ export class ComponentContainer extends EventEmitter {
         }
     }
 
-
     /**
      * Merges the provided state into the current one
      */
@@ -180,7 +190,6 @@ export class ComponentContainer extends EventEmitter {
         const extendedState = deepExtend(this.getState() as Record<string, unknown>, state);
         this.setState(extendedState as JsonValue);
     }
-
 
     /**
      * Notifies the layout manager of a stateupdate
@@ -199,7 +208,6 @@ export class ComponentContainer extends EventEmitter {
         }
     }
 
-
     /**
      * Set's the components title
      */
@@ -212,7 +220,6 @@ export class ComponentContainer extends EventEmitter {
         this._tab = tab as Tab;
         this.emit('tab', tab)
     }
-
 
     /**
      * Set's the containers size. Called by the container's component.
@@ -240,3 +247,9 @@ export class ComponentContainer extends EventEmitter {
 
 /** @public @deprecated use {@link ComponentContainer} */
 export type ItemContainer = ComponentContainer;
+
+/** @public */
+export namespace ComponentContainer {
+    export type StateRequestEventHandler = (this: void) => JsonValue | undefined;
+    export type BeforeDestroyEventHandler = (this: void) => void;
+}

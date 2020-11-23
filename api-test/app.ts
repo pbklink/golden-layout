@@ -1,7 +1,7 @@
-import { Config, GoldenLayout, UserSerialisableComponentConfig } from "../dist/golden-layout";
+import { Config, GoldenLayout, UserLayoutConfig, UserSerialisableComponentConfig } from "../dist/golden-layout";
 import { BooleanComponent } from './boolean-component';
 import { ColorComponent } from './color-component';
-import { prefinedLayouts } from './predefined-layouts';
+import { Layout, prefinedLayouts } from './predefined-layouts';
 import { TextComponent } from './text-component';
 
 export class App {
@@ -22,7 +22,7 @@ export class App {
     private _reloadSavedLayoutClickListener = () => this.handleReloadSavedLayoutClick();
  
     private _allComponentsRegistered = false;
-    private _savedConfig: Config | undefined;
+    private _savedLayout: Config | undefined;
 
     constructor() {
         const initialConfig = prefinedLayouts.colorComponentCompatible[0].config;
@@ -110,27 +110,35 @@ export class App {
             componentName,
             type: 'component',
         }
-        this._goldenLayout.root?.addChildFromItemConfig(userItemConfig)
+        this._goldenLayout.addItem(userItemConfig, 0)
     }
 
     private handleLayoutSelectChange() {
-        //
+        // nothing to do here
     }
 
     private handleLoadLayoutButtonClick() {
-        // should we destroy existing layout?
+        const layoutName = this._layoutSelect.value;
+        const layouts = this.getAvailableLayouts();
+        const selectedLayout = layouts.find((layout) => layout.name === layoutName);
+        if (selectedLayout === undefined) {
+            throw new Error('handleLayoutSelectChange');
+        } else {
+            this._goldenLayout.loadLayout(selectedLayout.config);
+        }
     }
 
     private handleSaveLayoutClick() {
-        this._savedConfig = this._goldenLayout.toConfig();
+        this._savedLayout = this._goldenLayout.saveLayout();
         this._reloadSavedLayout.disabled = false;
     }
 
     private handleReloadSavedLayoutClick() {
-        if (this._savedConfig === undefined) {
-            throw new Error('No saved config');
+        if (this._savedLayout === undefined) {
+            throw new Error('No saved layout');
         } else {
-            // should we destroy existing layout?
+            const userLayoutConfig = UserLayoutConfig.fromLayoutConfig(this._savedLayout);
+            this._goldenLayout.loadLayout(userLayoutConfig);
         }
     }
 
@@ -143,9 +151,13 @@ export class App {
         }
     }
 
+    private getAvailableLayouts(): Layout[] {
+        return this._allComponentsRegistered ? prefinedLayouts.allComponents : prefinedLayouts.colorComponentCompatible;
+    }
+
     private loadLayoutSelect() {
         this._layoutSelect.options.length = 0;
-        const layouts = this._allComponentsRegistered ? prefinedLayouts.colorComponentCompatible : prefinedLayouts.colorComponentCompatible;
+        const layouts = this.getAvailableLayouts();
         for (const layout of layouts) {
             const option = new Option(layout.name);
             this._layoutSelect.options.add(option);

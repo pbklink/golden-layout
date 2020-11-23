@@ -42,10 +42,16 @@ export interface AreaLinkedRect {
 }
 
 /** @public */
-export type JsonValue = string | number | boolean | null | undefined | Json | JsonValueArray;
+export type JsonValue = string | number | boolean | null | Json | JsonValueArray;
 /** @public */
 export interface Json {
     [name: string]: JsonValue;
 }
 /** @public */
 export type JsonValueArray = Array<JsonValue>
+/** @public */
+export namespace JsonValue {
+    export function isJson(value: JsonValue): value is Json {
+        return !Array.isArray(value) && value !== null && typeof value === 'object';
+    }
+}

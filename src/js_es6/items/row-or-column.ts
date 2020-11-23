@@ -1,9 +1,9 @@
 import { ItemConfig, RowOrColumnItemConfig } from '../config/config'
-import { UserComponentItemConfig, UserItemConfig, UserRowOrColumnItemConfig, UserStackItemConfig } from '../config/user-config'
+import { UserComponentItemConfig, UserItemConfig, UserRowOrColumnItemConfig, UserSerialisableComponentConfig, UserStackItemConfig } from '../config/user-config'
 import { Splitter } from '../controls/splitter'
 import { AssertError, UnexpectedNullError } from '../errors/internal-error'
 import { LayoutManager } from '../layout-manager'
-import { Side } from '../utils/types'
+import { JsonValue, Side } from '../utils/types'
 import {
     createTemplateHtmlElement,
     getElementHeight,
@@ -52,8 +52,8 @@ export class RowOrColumn extends ContentItem {
         this.isColumn = isColumn;
 
         this._childElementContainer = this.element;
-        this._splitterSize = layoutManager.managerConfig.dimensions.borderWidth;
-        this._splitterGrabSize = layoutManager.managerConfig.dimensions.borderGrabWidth;
+        this._splitterSize = layoutManager.layoutConfig.dimensions.borderWidth;
+        this._splitterGrabSize = layoutManager.layoutConfig.dimensions.borderGrabWidth;
         this._isColumn = isColumn;
         this._dimension = isColumn ? 'height' : 'width';
         this._splitterPosition = null;
@@ -70,8 +70,16 @@ export class RowOrColumn extends ContentItem {
         }
     }
 
+    addSerialisableComponent(componentTypeName: string, componentState?: JsonValue, index?: number): void {
+        const itemConfig: UserSerialisableComponentConfig = {
+            type: 'component',
+            componentName: componentTypeName,
+            componentState,
+        };
+        this.addItem(itemConfig, index);
+    }
 
-    addChildFromItemConfig(userItemConfig: UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig,
+    addItem(userItemConfig: UserRowOrColumnItemConfig | UserStackItemConfig | UserComponentItemConfig,
         index?: number
     ): void {
         const itemConfig = UserItemConfig.resolve(userItemConfig);
@@ -239,7 +247,7 @@ export class RowOrColumn extends ContentItem {
             this.contentItems.length = 0;
             this._rowOrColumnParent.replaceChild(this, childItem, true);
             if (this._rowOrColumnParent instanceof RowOrColumn) { // this check not included originally.
-                // If Root, then validateDocking not require
+                // If Ground, then validateDocking not require
                 this._rowOrColumnParent.validateDocking();
             }
         } else {
@@ -280,7 +288,7 @@ export class RowOrColumn extends ContentItem {
             throw new Error('Can\'t dock child when it single');
 
         const removedItemSize = contentItem.config[this._dimension];
-        const headerSize = this.layoutManager.managerConfig.header.show === false ? 0 : this.layoutManager.managerConfig.dimensions.headerHeight;
+        const headerSize = this.layoutManager.layoutConfig.header.show === false ? 0 : this.layoutManager.layoutConfig.dimensions.headerHeight;
         const index = this.contentItems.indexOf(contentItem);
         const splitterIndex = Math.max(index - 1, 0);
 
@@ -427,7 +435,7 @@ export class RowOrColumn extends ContentItem {
      */
     private calculateAbsoluteSizes() {
         const totalSplitterSize = (this.contentItems.length - 1) * this._splitterSize;
-        const headerSize = this.layoutManager.managerConfig.dimensions.headerHeight;
+        const headerSize = this.layoutManager.layoutConfig.dimensions.headerHeight;
         let { width: totalWidth, height: totalHeight } = getElementWidthAndHeight(this.element);
 
         if (this._isColumn) {
@@ -556,7 +564,7 @@ export class RowOrColumn extends ContentItem {
             width: number;
         }
 
-        const minItemWidth = this.layoutManager.managerConfig.dimensions.minItemWidth;
+        const minItemWidth = this.layoutManager.layoutConfig.dimensions.minItemWidth;
         let totalOverMin = 0;
         let totalUnderMin = 0;
         const entriesOverMin: Entry[] = [];
@@ -728,7 +736,7 @@ export class RowOrColumn extends ContentItem {
      */
     private onSplitterDragStart(splitter: Splitter) {
         const items = this.getItemsForSplitter(splitter);
-        const minSize = this.layoutManager.managerConfig.dimensions[this._isColumn ? 'minItemHeight' : 'minItemWidth'];
+        const minSize = this.layoutManager.layoutConfig.dimensions[this._isColumn ? 'minItemHeight' : 'minItemWidth'];
 
         const beforeMinDim = this._getMinimumDimensions(items.before.config.content);
         const beforeMinSize = this._isColumn ? beforeMinDim.vertical : beforeMinDim.horizontal;

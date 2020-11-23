@@ -1,6 +1,6 @@
-import { ManagerConfig, PopoutManagerConfig } from '../config/config';
+import { LayoutConfig, PopoutLayoutConfig } from '../config/config';
 import { PopoutBlockedError } from '../errors/external-error';
-import { AssertError, UnexpectedNullError } from '../errors/internal-error';
+import { UnexpectedNullError } from '../errors/internal-error';
 import { ContentItem } from '../items/content-item';
 import { LayoutManager } from '../layout-manager';
 import { ConfigMinifier } from '../utils/config-minifier';
@@ -33,7 +33,7 @@ export class BrowserPopout extends EventEmitter {
      * @param _initialWindowSize - A map with width, height, top and left
      * @internal
      */
-    constructor(private _config: PopoutManagerConfig,
+    constructor(private _config: PopoutLayoutConfig,
         private _initialWindowSize: Rect,
         private _layoutManager: LayoutManager,
     ) {
@@ -44,7 +44,7 @@ export class BrowserPopout extends EventEmitter {
         this.createWindow();
     }
 
-    toConfig(): PopoutManagerConfig {
+    toConfig(): PopoutLayoutConfig {
         if (this._isInitialised === false) {
             throw new Error('Can\'t create config, layout not yet initialised');
         }
@@ -62,23 +62,23 @@ export class BrowserPopout extends EventEmitter {
             top = this._popoutWindow.screenY ?? this._popoutWindow.screenTop;
         }
 
-        const window: PopoutManagerConfig.Window = {
+        const window: PopoutLayoutConfig.Window = {
             width: this.getGlInstance().width,
             height: this.getGlInstance().height,
             left,
             top,
         };
 
-        const config: PopoutManagerConfig = {
-            content: glInstanceConfig.content,
+        const config: PopoutLayoutConfig = {
+            root: glInstanceConfig.root,
             openPopouts: glInstanceConfig.openPopouts,
             settings: glInstanceConfig.settings,
             dimensions: glInstanceConfig.dimensions,
             header: glInstanceConfig.header,
-            maximisedItemId: glInstanceConfig.maximisedItemId,
             window,
             parentId: this._config.parentId,
-            indexInParent: this._config.indexInParent
+            indexInParent: this._config.indexInParent,
+            resolved: true,
         };
 
         return config;
@@ -133,36 +133,31 @@ export class BrowserPopout extends EventEmitter {
              * The callee (server [not server application]) is not available and disappeared
              */
             const glInstanceConfig = this.getGlInstance().toConfig();
-            const copiedGlInstanceConfig = deepExtend({}, glInstanceConfig) as ManagerConfig;
-            const copiedContent = copiedGlInstanceConfig.content;
-            if (copiedContent.length === 0) {
-                throw new AssertError('BPPICC13088');
+            const copiedGlInstanceConfig = deepExtend({}, glInstanceConfig) as LayoutConfig;
+            const copiedRoot = copiedGlInstanceConfig.root;
+            const groundItem = this._layoutManager.groundItem;
+            if (groundItem === null) {
+                throw new UnexpectedNullError('BPPIR34972');
             } else {
-                const copiedChildConfig = copiedContent[0];
-                const root = this._layoutManager.root;
-                if (root === null) {
-                    throw new UnexpectedNullError('BPPIR34972');
-                } else {
-                    parentItem = root.getItemsById(this._config.parentId)[0];
+                parentItem = groundItem.getItemsById(this._config.parentId)[0];
 
-                    /*
-                    * Fallback if parentItem is not available. Either add it to the topmost
-                    * item or make it the topmost item if the layout is empty
-                    */
-                    if (!parentItem) {
-                        if (root.contentItems.length > 0) {
-                            parentItem = root.contentItems[0];
-                        } else {
-                            parentItem = root;
-                        }
-                        index = 0;
+                /*
+                * Fallback if parentItem is not available. Either add it to the topmost
+                * item or make it the topmost item if the layout is empty
+                */
+                if (!parentItem) {
+                    if (groundItem.contentItems.length > 0) {
+                        parentItem = groundItem.contentItems[0];
+                    } else {
+                        parentItem = groundItem;
                     }
-
-                    const newContentItem = this._layoutManager.createAndInitContentItem(copiedChildConfig, parentItem);
-
-                    parentItem.addChild(newContentItem, index);
-                    this.close();
+                    index = 0;
                 }
+
+                const newContentItem = this._layoutManager.createAndInitContentItem(copiedRoot, parentItem);
+
+                parentItem.addChild(newContentItem, index);
+                this.close();
             }
         }
     }
@@ -202,7 +197,7 @@ export class BrowserPopout extends EventEmitter {
         this._popoutWindow = globalThis.open(url, target, features);
 
         if (!this._popoutWindow) {
-            if (this._layoutManager.managerConfig.settings.blockedPopoutsThrowError === true) {
+            if (this._layoutManager.layoutConfig.settings.blockedPopoutsThrowError === true) {
                 const error = new PopoutBlockedError('Popout blocked');
                 throw error;
             } else {

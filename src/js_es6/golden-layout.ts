@@ -1,5 +1,5 @@
-import { Config, ManagerConfig, PopoutManagerConfig } from './config/config';
-import { UserConfig } from './config/user-config';
+import { LayoutConfig, PopoutLayoutConfig } from './config/config';
+import { UserLayoutConfig } from './config/user-config';
 import { LayoutManager } from './layout-manager';
 import { ConfigMinifier } from './utils/config-minifier';
 import { createTemplateHtmlElement, getQueryStringParam, stripTags } from './utils/utils';
@@ -14,7 +14,7 @@ export class GoldenLayout extends LayoutManager {
     /**
     * @param container - A Dom HTML element. Defaults to body
     */
-   constructor(userConfig: UserConfig, container?: HTMLElement) {        
+   constructor(userConfig: UserLayoutConfig, container?: HTMLElement) {        
         super(GoldenLayout.createConfig(userConfig), container);
 
         if (this.isSubWindow) {
@@ -75,9 +75,9 @@ export class GoldenLayout extends LayoutManager {
      * @internal
      */
     private createSubWindows() {
-        for (let i = 0; i < this.managerConfig.openPopouts.length; i++) {
-            const popoutConfig = this.managerConfig.openPopouts[i];
-            this.createPopoutFromPopoutManagerConfig(popoutConfig);
+        for (let i = 0; i < this.layoutConfig.openPopouts.length; i++) {
+            const popoutConfig = this.layoutConfig.openPopouts[i];
+            this.createPopoutFromPopoutLayoutConfig(popoutConfig);
         }
     }
 
@@ -87,14 +87,14 @@ export class GoldenLayout extends LayoutManager {
      * @internal
      */
     private adjustToWindowMode() {
-        const popInButton = createTemplateHtmlElement('<div class="lm_popin" title="' + this.managerConfig.header.dock + '">' +
+        const popInButton = createTemplateHtmlElement('<div class="lm_popin" title="' + this.layoutConfig.header.dock + '">' +
             '<div class="lm_icon"></div>' +
             '<div class="lm_bg"></div>' +
             '</div>');
 
         popInButton.click = () => this.emit('popIn');
 
-        document.title = stripTags(this.managerConfig.content[0].title);
+        document.title = stripTags(this.layoutConfig.root.title);
 
         const headElement = document.head;
 
@@ -136,11 +136,11 @@ export class GoldenLayout extends LayoutManager {
 /** @public */
 export namespace GoldenLayout {
     /** @internal */
-    export function createConfig(userConfig: UserConfig): LayoutManager.ManagerConfigAndIsSubWindow {
+    export function createConfig(userConfig: UserLayoutConfig): LayoutManager.LayoutConfigAndIsSubWindow {
         const windowConfigKey = getQueryStringParam('gl-window');
         const isSubWindow = windowConfigKey !== null;  
 
-        let config: ManagerConfig;
+        let config: LayoutConfig;
         if (windowConfigKey !== null) {
             const windowConfigStr = localStorage.getItem(windowConfigKey);
             if (windowConfigStr === null) {
@@ -148,12 +148,12 @@ export namespace GoldenLayout {
             }
             localStorage.removeItem(windowConfigKey);
             const minifiedWindowConfig = JSON.parse(windowConfigStr);
-            config = (new ConfigMinifier()).unminifyConfig(minifiedWindowConfig) as PopoutManagerConfig;
+            config = (new ConfigMinifier()).unminifyConfig(minifiedWindowConfig) as PopoutLayoutConfig;
         } else {
-            if (UserConfig.isUserConfig(userConfig)) {
-                config = UserConfig.resolve(userConfig);
+            if (UserLayoutConfig.isUserLayoutConfig(userConfig)) {
+                config = UserLayoutConfig.resolve(userConfig);
             } else {
-                config = userConfig as Config;
+                config = userConfig as LayoutConfig;
             }
         }
 
@@ -171,7 +171,7 @@ export namespace GoldenLayout {
         // nextNode(config);
 
         return {
-            managerConfig: config,
+            layoutConfig: config,
             isSubWindow,
         };
     }

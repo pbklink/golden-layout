@@ -2,7 +2,7 @@ import { AssertError } from '../errors/internal-error';
 
 /** @public */
 export const enum I18nStringId {
-    PopoutCannotBeCreatedWithRootItemConfig,
+    PopoutCannotBeCreatedWithGroundItemConfig,
     PleaseRegisterAConstructorFunction,
     ComponentIsAlreadyRegistered,
 }
@@ -23,9 +23,9 @@ export namespace I18nStrings {
 
     /** @internal */
     const infosObject: InfosObject = {
-        PopoutCannotBeCreatedWithRootItemConfig: {
-            id: I18nStringId.PopoutCannotBeCreatedWithRootItemConfig,
-            default: 'Popout cannot be created with root ItemConfig'
+        PopoutCannotBeCreatedWithGroundItemConfig: {
+            id: I18nStringId.PopoutCannotBeCreatedWithGroundItemConfig,
+            default: 'Popout cannot be created with ground ItemConfig'
         },
         PleaseRegisterAConstructorFunction: {
             id: I18nStringId.PleaseRegisterAConstructorFunction,

@@ -17,7 +17,6 @@ module.exports = {
         path: path.resolve(__dirname, 'dist/'),
     },
 
-    devtool: "cheap-module-source-map",
     devtool: 'inline-source-map',
 
     devServer: {
@@ -54,6 +53,11 @@ module.exports = {
                         loader: "less-loader",
                     }
                 ],
+            },
+            {
+                test: /\.js$/,
+                enforce: 'pre',
+                use: ['source-map-loader'],
             }
         ]
     },

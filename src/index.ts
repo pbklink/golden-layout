@@ -15,9 +15,9 @@ export * from './js_es6/errors/external-error';
 export { GoldenLayout } from './js_es6/golden-layout';
 export { ComponentItem } from './js_es6/items/component-item';
 export { ContentItem } from './js_es6/items/content-item';
-export { Root } from './js_es6/items/root';
 export { RowOrColumn } from './js_es6/items/row-or-column';
 export { Stack } from './js_es6/items/stack';
 export { LayoutManager } from './js_es6/layout-manager';
 export * from './js_es6/utils/i18n-strings';
+export { Json, JsonValue, JsonValueArray } from './js_es6/utils/types';
 
