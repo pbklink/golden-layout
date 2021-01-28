@@ -81,7 +81,7 @@ The source can be installed by cloning the repository at:\
 `https://github.com/golden-layout/golden-layout`
 
 To build the distribution locally, open a shell at the golden-layout directory/folder and run the following commands:
-1. `npm install` to install required dependencies
+1. `npm install` or `npm ci` (recommended) to install required dependencies
 1. `npm run build:api` to generate the distribution (`dist` subfolder). This script will:
     * delete the existing `lib` and `dist` folders
     * compile the TypeScript code
