@@ -36,7 +36,7 @@ Some features have been ported to TypeScript but are not yet ready for productio
 
 * **Popouts** - The coding for this has been completed however testing still needs to be carried out.
 * **Touch Support** - Improvements are required in accessing browser Touch/Drag APIs.  Also some conceptual aspects of the implementation need to be improved.  These will be carried out in a future release.
-* **Some API functions** - While most API functions have been ported, not all have been tested.  The APIs used in the Test Application (both api-test and Angular example) have been tested and are ready for production.  Other API functions should work but please take this warning into account.
+* **Some API functions** - While most API functions have been ported, not all have been tested.  The APIs used in the Test Application (both demo app and Angular example) have been tested and are ready for production.  Other API functions should work but please take this warning into account.
 
 ### Migration
 
@@ -82,7 +82,7 @@ The source can be installed by cloning the repository at:\
 
 To build the distribution locally, open a shell at the golden-layout directory/folder and run the following commands:
 1. `npm install` or `npm ci` (recommended) to install required dependencies
-1. `npm run build:api` to generate the distribution (`dist` subfolder). This script will:
+1. `npm run build` to generate the distribution (`dist` subfolder). This script will:
     * delete the existing `lib` and `dist` folders
     * compile the TypeScript code
     * generate the rolled up TypeScript definition files (`index.d.ts` and `golden-layout-untrimmed.d.ts`)
@@ -93,15 +93,15 @@ Note that the`lib` subfolder only holds the TypeScript declaration files generat
 
 ### Build and run demo/test app
 
-After installing the source and building the distribution, you can build and start the `api-test` app to view the library in action. Use the following commands:
-* `npm run build:apitest` to just build it
-* `npm run start:apitest` to both build and start the development server.\
+After installing the source and building the distribution, you can build and start the `demo` app to view the library in action. Use the following commands:
+* `npm run demo:build` to just build it
+* `npm run demo:serve` to both build and start the development server.\
 You can then view it in your browser using the following link:\
-http://localhost:3000/api-test/dist
+http://localhost:3000/
 
 ### Debugging Golden Layout library
 
-The `api-test` can be used to debug the Golden Layout library.  Its `webpack` configuration will import the Golden Layout library source map, allowing debuggers to step through the library source code and place break points.
+The `demo` can be used to debug the Golden Layout library.  Its `webpack` configuration will import the Golden Layout library source map, allowing debuggers to step through the library source code and place break points.
 
 If you wish to test the library with other applications, you can link to the Golden Layout repository without having to install it into the application from NPM.  This is done with the `npm link` command.  Use the following steps:
 1. Make sure that the `golden-layout` package is **not** included as a dependency in the application's package
@@ -155,7 +155,7 @@ The `LayoutConfig` `selectionEnabled` property has been removed. Clicking of Sta
 1. `minifyConfig()` Replaces `LayoutManager.minifyConfig()`
 1. `unminifyConfig()` Replaces `LayoutManager.unminifyConfig()`
 
-For examples of how to create LayoutConfigs, please refer to the api-test program in the repository.
+For examples of how to create LayoutConfigs, please refer to the demo program in the repository.
 
 Many of the Config properties have been deprecated as they overlapped or were moved to more appropriate locations. Please refer to the `config.ts` source file for more information about these deprecations.
 
@@ -249,7 +249,7 @@ The library distribution includes 2 TypeScript declaration (typing) files:
 1. `index.d.ts` which contains only public API elements.  Applications should use this declaration file to access the library.
 1. `golden-layout-untrimmed.d.ts` which contains all (public and internal) API elements.  Use this declaration file if you wish to access any API element in the library however please take the above warning into account.
 
-Note that the allocation of API elements to either public or internal has not been finalised.  However any element used in either the api-test application or the example Angular application will remain labelled as public.
+Note that the allocation of API elements to either public or internal has not been finalised.  However any element used in either the demo application or the example Angular application will remain labelled as public.
 
 ---
 
