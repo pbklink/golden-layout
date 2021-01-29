@@ -22,7 +22,7 @@ module.exports = {
     devServer: {
         port: 3000,
         writeToDisk: true,
-        publicPath: 'demo/dist/',
+        publicPath: 'apitest/dist/',
         contentBase: path.resolve(__dirname, 'dist'),
     },
 
